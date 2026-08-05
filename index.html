@@ -127,10 +127,13 @@
                             <select id="fazenda" onchange="aoSelecionarFazenda()" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-agro-500 focus:outline-none bg-white font-medium text-slate-800">
                                 <option value="">-- Selecione a Fazenda --</option>
                                 <option value="AgroChapada">AgroChapada</option>
+                                <option value="Bigolin">Bigolin</option>
                                 <option value="Flórida">Flórida</option>
                                 <option value="Horizonte">Horizonte</option>
+                                <option value="Jatobá">Jatobá</option>
                                 <option value="Juanita">Juanita</option>
                                 <option value="Miyata">Miyata</option>
+                                <option value="Ponte_Serrada">Ponte Serrada</option>
                                 <option value="Porto_Seguro">Porto Seguro</option>
                                 <option value="Recreio">Recreio</option>
                                 <option value="Suez">Suez</option>
@@ -484,30 +487,101 @@
         // BASE DE DADOS COMPLETA DAS FAZENDAS E TALHÕES COM SEUS HECTARES
         const FAZENDAS_DB = {
             'AgroChapada': [
-                { talhao: 'S 77', area: 261 }, { talhao: 'S 78', area: 80 }, { talhao: 'S 79', area: 173 }, { talhao: 'S 80', area: 196 },
-                { talhao: 'S 81', area: 99 }, { talhao: 'S 82', area: 174 }, { talhao: 'S 83', area: 59 }, { talhao: 'S 84', area: 400 },
+                { talhao: 'S 65', area: 28 }, { talhao: 'S 68', area: 154 }, { talhao: 'S 70', area: 93 }, { talhao: 'S 72', area: 60 },
+                { talhao: 'S 74', area: 81 }, { talhao: 'S 76', area: 155 }, { talhao: 'S 77', area: 196 }, { talhao: 'S 77', area: 65 },
+                { talhao: 'S 78', area: 80 }, { talhao: 'S 79', area: 173 }, { talhao: 'S 80', area: 196 }, { talhao: 'S 81', area: 99 },
+                { talhao: 'S 82', area: 174 }, { talhao: 'S 83', area: 59 }, { talhao: 'S 84', area: 400 }, { talhao: 'S 84', area: 29 },
                 { talhao: 'S 84 B', area: 144 }, { talhao: 'S 85', area: 205 }, { talhao: 'S 86', area: 273 }, { talhao: 'S 87', area: 96 },
-                { talhao: 'S 88', area: 134 }, { talhao: 'S 89', area: 158 }, { talhao: 'S 90', area: 147 }, { talhao: 'S 91', area: 118 },
-                { talhao: 'JG 01', area: 166 }, { talhao: 'JG 02', area: 236 }, { talhao: 'JG 03', area: 185 }, { talhao: 'JG 09', area: 217 },
-                { talhao: 'TO 4', area: 274 }, { talhao: 'TO 5', area: 272 }, { talhao: 'TO 6', area: 158 }, { talhao: 'TO 11', area: 305 },
-                { talhao: 'SJ 1A', area: 140 }, { talhao: 'SJ 1B', area: 157 }, { talhao: 'SJ 2B', area: 415 }, { talhao: 'SJ 3', area: 322 }
+                { talhao: 'S 88', area: 53 }, { talhao: 'S 88', area: 62 }, { talhao: 'S 88', area: 19 }, { talhao: 'S 89', area: 158 },
+                { talhao: 'S 90', area: 147 }, { talhao: 'S 91', area: 118 }, { talhao: 'S 92', area: 149 }, { talhao: 'S 93', area: 111 },
+                { talhao: 'S 94', area: 66 }, { talhao: 'S 95', area: 133 }, { talhao: 'S 96', area: 75 }, { talhao: 'S 97', area: 136 },
+                { talhao: 'S 98', area: 139 }, { talhao: 'S 99', area: 93 }, { talhao: 'S 100', area: 165 }, { talhao: 'S 101', area: 178 },
+                { talhao: 'MG Silo', area: 21 }, { talhao: 'MG S', area: 80 }, { talhao: 'MG LIXÃO', area: 15 }, { talhao: 'JG 01', area: 166 },
+                { talhao: 'JG6/8', area: 197 }, { talhao: 'JG 7', area: 51 }, { talhao: 'JG 7', area: 50 }, { talhao: 'JG 09', area: 217 },
+                { talhao: 'JG 10', area: 210 }, { talhao: 'JG 11', area: 217 }, { talhao: 'JG 12', area: 217 }, { talhao: 'JG 13', area: 13 },
+                { talhao: 'JG 13', area: 187 }, { talhao: 'JG 14', area: 200 }, { talhao: 'JG 21 A', area: 200 }, { talhao: 'JG 21 A', area: 172 },
+                { talhao: 'JG 21B', area: 70 }, { talhao: 'JG 21B', area: 85 }, { talhao: 'JG 21C', area: 65 }, { talhao: 'JG 21C', area: 70 },
+                { talhao: 'JG 22', area: 389 }, { talhao: 'JG MG A', area: 59 }, { talhao: 'JG MG B', area: 92 }, { talhao: 'JG MG C', area: 50 },
+                { talhao: 'JG MG D', area: 121 }, { talhao: 'JG MG E', area: 18 }, { talhao: 'JG MG E', area: 40 }, { talhao: 'TO 4', area: 87 },
+                { talhao: 'TO 4', area: 39 }, { talhao: 'TO 4', area: 65 }, { talhao: 'TO 4', area: 84 }, { talhao: 'TO 5', area: 185 },
+                { talhao: 'TO 5', area: 87 }, { talhao: 'TO 6', area: 78 }, { talhao: 'TO 6', area: 80 }, { talhao: 'TO 7', area: 115 },
+                { talhao: 'TO 8', area: 102 }, { talhao: 'TO 9', area: 94 }, { talhao: 'TO 10', area: 178 }, { talhao: 'TO 11', area: 142 },
+                { talhao: 'TO 11', area: 163 }, { talhao: 'TO 12', area: 516 }, { talhao: 'TO 13', area: 146 }, { talhao: 'TO 13B', area: 137 },
+                { talhao: 'TO 14', area: 151 }, { talhao: 'TO 14B', area: 183 }, { talhao: 'TO 15', area: 96 }, { talhao: 'TO 15', area: 214 },
+                { talhao: 'TO 15B', area: 198 }, { talhao: 'TO 16', area: 222 }, { talhao: 'TO 16', area: 313 }, { talhao: 'TO 17A', area: 248 },
+                { talhao: 'TO 17B', area: 421 }, { talhao: 'TO 18', area: 326 }, { talhao: 'TO 19', area: 99 }, { talhao: 'TO 19', area: 222 },
+                { talhao: 'TO 20', area: 217 }, { talhao: 'TO 20B', area: 168 }, { talhao: 'TO 21', area: 202 }, { talhao: 'TO 21B', area: 121 },
+                { talhao: 'TO 22', area: 283 }, { talhao: 'TO 23', area: 272 }, { talhao: 'TO 24', area: 15 }, { talhao: 'TO 24', area: 217 },
+                { talhao: 'MG TO 17', area: 38 }, { talhao: 'MG TO R', area: 187 }, { talhao: 'MG TO', area: 60 }, { talhao: 'MG TO', area: 365 },
+                { talhao: 'AWC', area: 443 }, { talhao: 'SJ 1A', area: 140 }, { talhao: 'SJ 1B', area: 157 }, { talhao: 'SJ 2A', area: 116 },
+                { talhao: 'SJ 2B', area: 141 }, { talhao: 'SJ 2B', area: 274 }, { talhao: 'SJ 3', area: 282 }, { talhao: 'SJ 3', area: 40 },
+                { talhao: 'SJ 4', area: 40 }, { talhao: 'SJ 4', area: 43 }, { talhao: 'SJ 4', area: 132 }, { talhao: 'SJ 4', area: 67 },
+                { talhao: 'SJ 5', area: 143 }, { talhao: 'SJ 5', area: 63 }, { talhao: 'SJ 6', area: 117 }, { talhao: 'SJ 7', area: 251 },
+                { talhao: 'SJ 8', area: 191 }, { talhao: 'SJ 9', area: 277 }, { talhao: 'SJ 10', area: 584 }
+            ],
+            'Bigolin': [
+                { talhao: 'P3P4', area: 245 }, { talhao: 'A1', area: 150 }, { talhao: 'A2', area: 145 }, { talhao: 'A5', area: 140 },
+                { talhao: 'A4', area: 140 }, { talhao: 'A3', area: 140 }, { talhao: 'P1P2', area: 210 }, { talhao: '5B', area: 84 },
+                { talhao: '1', area: 240 }, { talhao: '2', area: 125 }, { talhao: '3A', area: 89 }, { talhao: '3B', area: 41 },
+                { talhao: '5A', area: 36 }, { talhao: 'PV1', area: 67.5 }, { talhao: 'PV2', area: 135 }, { talhao: 'P8', area: 135 },
+                { talhao: '24B', area: 11 }, { talhao: '10', area: 100 }, { talhao: '11', area: 100 }, { talhao: '21', area: 100 },
+                { talhao: '16', area: 100 }, { talhao: '15', area: 100 }, { talhao: '20', area: 100 }, { talhao: '6', area: 80 },
+                { talhao: '22B', area: 60 }, { talhao: '22A', area: 40 }, { talhao: '13', area: 100 }, { talhao: '18', area: 100 },
+                { talhao: '17C', area: 17 }, { talhao: '17B', area: 51 }, { talhao: '17A', area: 32 }, { talhao: '14A', area: 43 },
+                { talhao: '23', area: 100 }, { talhao: '12', area: 100 }, { talhao: '19', area: 60 }, { talhao: '24A', area: 54 },
+                { talhao: '14B', area: 22 }, { talhao: '27', area: 100 }, { talhao: '26', area: 50 }, { talhao: 'P3P4', area: 200 },
+                { talhao: '11', area: 100 }, { talhao: '10', area: 100 }, { talhao: '6', area: 80 }, { talhao: 'P1P2', area: 160 },
+                { talhao: 'P1P2', area: 42 }, { talhao: 'PV01', area: 67.5 }, { talhao: 'PV02', area: 30 }, { talhao: 'PV02', area: 105 },
+                { talhao: 'P8', area: 30 }, { talhao: 'P8', area: 110 }, { talhao: '24', area: 65 }, { talhao: '19', area: 25 },
+                { talhao: '19', area: 40 }, { talhao: '23', area: 64 }, { talhao: '23', area: 2 }, { talhao: '23', area: 21 },
+                { talhao: '23', area: 13 }, { talhao: '15', area: 100 }, { talhao: '16', area: 100 }, { talhao: '17', area: 55 },
+                { talhao: '17', area: 45 }, { talhao: '18', area: 100 }, { talhao: '21', area: 65 }, { talhao: '21', area: 35 },
+                { talhao: '22', area: 100 }, { talhao: '14', area: 43 }, { talhao: '14', area: 22 }, { talhao: '13', area: 100 },
+                { talhao: '12', area: 56 }, { talhao: '12', area: 44 }, { talhao: '20 A2', area: 20 }, { talhao: '20 A1', area: 30 },
+                { talhao: 'P3P4', area: 36 }, { talhao: 'A1', area: 150 }, { talhao: 'A2', area: 110 }, { talhao: 'A2', area: 15 },
+                { talhao: 'A2', area: 5 }, { talhao: 'A2', area: 15 }, { talhao: 'A3', area: 145 }, { talhao: 'A4', area: 140 },
+                { talhao: 'A5', area: 134 }, { talhao: 'A5', area: 6 }, { talhao: '1', area: 240 }, { talhao: '2', area: 113 },
+                { talhao: '2', area: 7 }, { talhao: '3', area: 130 }, { talhao: '5', area: 15 }, { talhao: '5', area: 15 },
+                { talhao: '5', area: 90 }
             ],
             'Flórida': [
-                { talhao: 'TH01A', area: 101 }, { talhao: 'TH01B', area: 78 }, { talhao: 'TH02', area: 90 },
+                { talhao: 'TH01A', area: 148.5 }, { talhao: 'TH01B', area: 30.5 }, { talhao: 'TH02', area: 90 },
                 { talhao: 'TH03', area: 130 }, { talhao: 'TH04', area: 174 }, { talhao: 'TH05A', area: 146 }, { talhao: 'TH05B', area: 69 }, { talhao: 'TH07', area: 75 }, { talhao: 'TH08', area: 64 },
                 { talhao: 'TH09A', area: 80 }, { talhao: 'TH09B', area: 109 }, { talhao: 'TH011', area: 130 }, { talhao: 'TH012', area: 81 }, 
-                { talhao: 'TH013', area: 66 }, { talhao: 'TH010', area: 97 }
+                { talhao: 'TH013', area: 80 }, { talhao: 'TH010', area: 70 }
             ],
             'Horizonte': [
                 { talhao: 'TH01', area: 10 }, { talhao: 'TH02', area: 100 }, { talhao: 'TH03', area: 130 },
                 { talhao: 'TH04', area: 75 }, { talhao: 'TH05A', area: 122 }, { talhao: 'TH05B', area: 43 },
                 { talhao: 'TH06', area: 25 }, { talhao: 'TH07', area: 10 }, { talhao: 'TH08', area: 11 },
-                { talhao: 'TH08', area: 12 }, { talhao: 'TH09', area: 12 }, { talhao: 'TH10', area: 11 },
+                { talhao: 'TH09', area: 12 }, { talhao: 'TH10', area: 11 },
                 { talhao: 'TH13', area: 120 }, { talhao: 'TH14', area: 88 }, { talhao: 'TH15A', area: 44 }, { talhao: 'TH15B', area: 3 }
             ],
+            'Jatobá': [
+                { talhao: 'J1', area: 185 }, { talhao: 'J1', area: 61 }, { talhao: 'J2', area: 162 }, { talhao: 'J3', area: 206 },
+                { talhao: 'J4', area: 113 }, { talhao: 'J5', area: 124 }, { talhao: 'J6', area: 137 }, { talhao: 'J7', area: 77 },
+                { talhao: 'J7', area: 12 }, { talhao: 'J7', area: 15 }, { talhao: 'J8', area: 135 }, { talhao: 'J9', area: 177 },
+                { talhao: 'J9', area: 34 }, { talhao: 'J10', area: 102 }, { talhao: 'J11', area: 113 }, { talhao: 'J11', area: 50 },
+                { talhao: 'J12', area: 138 }, { talhao: 'J13', area: 129 }, { talhao: 'J14', area: 121 }, { talhao: 'J15', area: 27 },
+                { talhao: 'J15', area: 16 }, { talhao: 'J15', area: 29 }, { talhao: 'J15', area: 27 }, { talhao: 'J16', area: 25 },
+                { talhao: 'J16', area: 17 }, { talhao: 'J16', area: 32 }, { talhao: 'J16', area: 31 }, { talhao: 'J17', area: 39 },
+                { talhao: 'J17', area: 36 }, { talhao: 'J18', area: 41 }, { talhao: 'J21', area: 240 }, { talhao: 'J22', area: 49 },
+                { talhao: 'J22', area: 28 }, { talhao: 'J22', area: 65 }, { talhao: 'J22', area: 77 }, { talhao: 'J23', area: 143 },
+                { talhao: 'J24', area: 81 }, { talhao: 'J24', area: 29 }, { talhao: 'J25', area: 123 }, { talhao: 'J26', area: 102 },
+                { talhao: 'J39', area: 176 }, { talhao: 'J40', area: 213 }, { talhao: 'J41', area: 268 }, { talhao: 'J42', area: 246 },
+                { talhao: 'J43', area: 164 }, { talhao: 'J43', area: 2 }, { talhao: 'J43', area: 2 }, { talhao: 'J43', area: 2 },
+                { talhao: 'J50', area: 78 }, { talhao: 'J52', area: 296 }, { talhao: 'J53', area: 215 }, { talhao: 'J53', area: 29 },
+                { talhao: 'J53', area: 156 }, { talhao: 'J53', area: 84 }, { talhao: 'J54', area: 97 }, { talhao: 'J54', area: 197 },
+                { talhao: 'J58', area: 109 }, { talhao: 'J58', area: 30 }, { talhao: 'J58B', area: 84 }, { talhao: 'J61', area: 164 },
+                { talhao: 'Margem', area: 185 }, { talhao: 'S1', area: 211 }, { talhao: 'S1', area: 103 }, { talhao: 'S2', area: 354 },
+                { talhao: 'S40', area: 89 }, { talhao: 'S41', area: 29 }, { talhao: 'S41', area: 74 }, { talhao: 'S41', area: 107 },
+                { talhao: 'S42', area: 330 }, { talhao: 'S44', area: 123 }, { talhao: 'S44', area: 89 }, { talhao: 'S47', area: 111 },
+                { talhao: 'S47', area: 62 }, { talhao: 'S49', area: 117 }, { talhao: 'S49', area: 44 }, { talhao: 'S51', area: 119 },
+                { talhao: 'S51', area: 80 }, { talhao: 'S53', area: 185 }, { talhao: 'S53', area: 130 }
+            ],
             'Juanita': [
-                { talhao: 'TH01', area: 100 }, { talhao: 'TH02', area: 242 }, { talhao: 'TH03', area: 176 },
-                { talhao: 'TH04', area: 272 }, { talhao: 'TH05', area: 235 }, { talhao: 'TH06', area: 106 }
+                { talhao: 'TH01', area: 100 }, { talhao: 'TH02', area: 242 }, { talhao: 'TH03', area: 194 },
+                { talhao: 'TH04', area: 296 }, { talhao: 'TH05', area: 235 }, { talhao: 'TH06', area: 105 }
             ],
             'Miyata': [
                 { talhao: 'TH01', area: 75 }, { talhao: 'TH02', area: 127 }, { talhao: 'TH03', area: 164 },
@@ -515,12 +589,17 @@
                 { talhao: 'TH07A', area: 68 }, { talhao: 'TH07B', area: 80 }, { talhao: 'TH08A', area: 72 }, { talhao: 'TH08B', area: 99 }, { talhao: 'TH09', area: 75 }, 
                 { talhao: 'TH010', area: 115 }
             ],
+            'Ponte_Serrada': [
+                { talhao: 'N1', area: 169 }, { talhao: 'PIVO', area: 133 }, { talhao: 'S1S2', area: 355 }, { talhao: 'S3', area: 275.1 },
+                { talhao: 'S4', area: 173.7 }, { talhao: 'T1T2', area: 250 }, { talhao: 'T3', area: 155 }, { talhao: 'T4', area: 38.5 },
+                { talhao: 'T5', area: 117 }, { talhao: 'T6', area: 187 }, { talhao: 'P1P2', area: 274.6 }, { talhao: 'P3P4', area: 340.6 }
+            ],
             'Porto_Seguro': [
-                { talhao: 'PSP', area: 106 }, { talhao: 'PS1', area: 206 }, { talhao: 'PS2', area: 142 },
-                { talhao: 'PS3', area: 220 }, { talhao: 'PS4', area: 245 }, { talhao: 'PS5', area: 40 },
+                { talhao: 'PSP', area: 106 }, { talhao: 'PS1', area: 207 }, { talhao: 'PS2', area: 142 },
+                { talhao: 'PS3', area: 222 }, { talhao: 'PS4', area: 246 }, { talhao: 'PS5', area: 39 },
                 { talhao: 'PS6', area: 153 }, { talhao: 'PS0', area: 80 }, { talhao: 'PS0B', area: 112 },
-                { talhao: 'Q1', area: 59 }, { talhao: 'Q2', area: 45 }, { talhao: 'Q4', area: 152 },
-                { talhao: 'A1', area: 133 }, { talhao: 'A2', area: 28 }, { talhao: 'A3', area: 86 },
+                { talhao: 'Q1', area: 59 }, { talhao: 'Q2', area: 46 }, { talhao: 'Q4', area: 152 },
+                { talhao: 'A1', area: 133 }, { talhao: 'A2', area: 28 }, { talhao: 'A3', area: 87 },
                 { talhao: 'A4', area: 65 }, { talhao: 'Q3', area: 180 }
             ],
             'Recreio': [
@@ -528,8 +607,27 @@
                 { talhao: 'RC 4', area: 304 }, { talhao: 'RC 5', area: 179 }, { talhao: 'RC 6', area: 91 }
             ],
             'Suez': [
-                { talhao: 'TH108', area: 108 }, { talhao: 'TH116', area: 58 }, { talhao: 'TH126', area: 63 },
-                { talhao: 'TH191', area: 191 }, { talhao: 'TH199B', area: 199 }, { talhao: 'TH345', area: 345 }
+                { talhao: 'SA01', area: 61.83 },
+                { talhao: 'SA02', area: 121.93 },
+                { talhao: 'SA06', area: 74.01 },
+                { talhao: 'SA05', area: 97.77 },
+                { talhao: 'SA04', area: 149.44 },
+                { talhao: 'SA03', area: 61.6 },
+                { talhao: '126', area: 126.46 },
+                { talhao: '130', area: 128.54 },
+                { talhao: '224', area: 226.24 },
+                { talhao: '326', area: 326.22 },
+                { talhao: '152', area: 153.61 },
+                { talhao: '139', area: 140.02 },
+                { talhao: '108', area: 109.89 },
+                { talhao: '199B', area: 199.28 },
+                { talhao: '75', area: 73.58 },
+                { talhao: '191', area: 192.02 },
+                { talhao: '196', area: 197.18 },
+                { talhao: '285', area: 282.81 },
+                { talhao: '215', area: 213.93 },
+                { talhao: '199', area: 196.9 },
+                { talhao: '116', area: 116.21 }
             ]
         };
 
