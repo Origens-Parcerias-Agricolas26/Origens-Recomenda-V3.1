@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Recomendação Agrícola - Origens Recomenda Digital</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- html2pdf.js para Geração de PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        agro: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #printable-report, #printable-report * {
+                visibility: visible;
+            }
+            #printable-report {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen pb-12">
+
+    <!-- CABEÇALHO / NAVEGAÇÃO -->
+    <header class="bg-agro-800 text-white shadow-lg no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-4">
+                <div class="flex items-center bg-agro-900/40 p-2 rounded-xl border border-agro-700/50">
+                    <svg class="h-11 w-auto fill-white" viewBox="0 0 320 160" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M 160 8 C 146 28 148 46 160 60 C 172 46 174 28 160 8 Z" />
+                        <path d="M 152 48 C 130 28 110 36 98 44 C 118 54 138 54 152 48 Z" />
+                        <path d="M 168 48 C 190 28 210 36 222 44 C 202 54 182 54 168 48 Z" />
+                        <rect x="85" y="66" width="150" height="5" rx="1" />
+                        <rect x="88" y="75" width="144" height="5" rx="1" />
+                        <rect x="95" y="84" width="130" height="5" rx="1" />
+                        <path d="M 106 93 C 120 107 140 113 160 113 C 180 113 200 107 214 93 L 207 93 C 195 103 179 108 160 108 C 141 108 125 103 113 93 Z" />
+                        <path d="M 158 52 L 162 52 L 162 95 L 158 95 Z" />
+                        <path d="M 158 85 L 160 110 L 162 85 Z" />
+                        <path d="M 159 75 Q 140 87 125 93 L 127 96 Q 142 90 160 80 Z" />
+                        <path d="M 161 75 Q 180 87 195 93 L 193 96 Q 178 90 160 80 Z" />
+                        <path d="M 159 85 Q 148 97 138 103 L 140 105 Q 150 99 160 88 Z" />
+                        <path d="M 161 85 Q 172 97 182 103 L 180 105 Q 170 99 160 88 Z" />
+                        <text x="160" y="138" text-anchor="middle" font-family="'Plus Jakarta Sans', sans-serif" font-weight="800" font-size="26" letter-spacing="4">ORIGENS</text>
+                        <text x="160" y="154" text-anchor="middle" font-family="'Plus Jakarta Sans', sans-serif" font-weight="600" font-size="10" letter-spacing="2">Parcerias Agrícolas</text>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold leading-tight">Origens Recomenda Digital</h1>
+                    <p class="text-xs text-agro-100">Sistema Multi-Fazendas & Emissão de Relatório Técnico</p>
+                </div>
+            </div>
+            
+            <div class="flex flex-wrap items-center gap-2">
+                <button onclick="carregarExemplo()" class="px-3 py-2 bg-agro-700 hover:bg-agro-600 text-xs font-semibold rounded-lg transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-rotate-left"></i> Carregar Exemplo
+                </button>
+                <button onclick="gerarPDF()" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-white font-semibold text-xs rounded-lg shadow transition flex items-center gap-2">
+                    <i class="fa-solid fa-file-pdf"></i> Download PDF
+                </button>
+                <button onclick="compartilharPdfWhatsApp()" class="px-4 py-2 bg-green-600 hover:bg-green-500 text-white font-semibold text-xs rounded-lg shadow transition flex items-center gap-2">
+                    <i class="fa-brands fa-whatsapp text-sm"></i> Enviar PDF via WhatsApp
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN APP CONTAINER -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- FORMULÁRIO DE PREENCHIMENTO (7 COLUNAS) -->
+            <div class="lg:col-span-7 space-y-6 no-print">
+                
+                <!-- CARD 1: SELEÇÃO DE FAZENDA, MULTI-TALHÕES & CULTURA -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-map-location-dot text-agro-600"></i> Localização & Seleção de Talhões
+                        </h2>
+                        <span class="text-xs font-semibold bg-agro-50 text-agro-800 px-2.5 py-1 rounded-full border border-agro-100">
+                            Nº <input type="text" id="rec_num" value="01" class="w-12 bg-transparent font-bold focus:outline-none text-right">
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Fazenda Selecionada</label>
+                            <select id="fazenda" onchange="aoSelecionarFazenda()" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-agro-500 focus:outline-none bg-white font-medium text-slate-800">
+                                <option value="">-- Selecione a Fazenda --</option>
+                                <option value="AgroChapada">AgroChapada</option>
+                                <option value="Flórida">Flórida</option>
+                                <option value="Horizonte">Horizonte</option>
+                                <option value="Juanita">Juanita</option>
+                                <option value="Miyata">Miyata</option>
+                                <option value="Porto_Seguro">Porto Seguro</option>
+                                <option value="Recreio">Recreio</option>
+                                <option value="Suez">Suez</option>
+                            </select>
+                        </div>
+
+                        <!-- MULTI-SELEÇÃO DE TALHÕES -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">
+                                Talhões (Segure Ctrl/Cmd para Vários)
+                            </label>
+                            <select id="talhoes_multi_select" multiple onchange="aoSelecionarMultiplosTalhoes()" class="w-full h-28 px-3 py-2 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-agro-500 focus:outline-none bg-white">
+                                <option value="" disabled>-- Selecione a Fazenda Primeiro --</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Área Total Selecionada (ha)</label>
+                            <div class="relative">
+                                <input type="number" id="area_ha" placeholder="0" oninput="calcularCalibracao()" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-bold text-slate-800 focus:ring-2 focus:ring-agro-500 focus:outline-none bg-amber-50">
+                                <span class="absolute right-3 top-2.5 text-xs text-slate-400 font-semibold">ha</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Cultura</label>
+                            <select id="cultura" onchange="atualizarPDF()" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-agro-500 focus:outline-none bg-white font-medium text-slate-800">
+                                <option value="Soja">Soja</option>
+                                <option value="Milho">Milho</option>
+                                <option value="Algodão">Algodão</option>
+                                <option value="Feijão">Feijão</option>
+                                <option value="Café">Café</option>
+                                <option value="Trigo">Trigo</option>
+                                <option value="Girassol">Girassol</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Estágio Fenológico</label>
+                            <input type="text" id="estagio" value="V4 / Dessecamento" oninput="atualizarPDF()" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Objetivo da Aplicação</label>
+                            <input type="text" id="objetivo" value="Manejo de plantas daninhas pré-plantio" oninput="atualizarPDF()" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Data da Visita</label>
+                            <input type="date" id="data_atual" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Data para Aplicação</label>
+                            <input type="date" id="data_aplicacao" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 2: CALIBRAÇÃO DO EQUIPAMENTO -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                    <div class="border-b border-slate-100 pb-3 mb-4 flex justify-between items-center">
+                        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-tractor text-agro-600"></i> Calibração do Pulverizador
+                        </h2>
+                        <span id="badge_ha_tanque" class="text-xs font-bold bg-amber-50 text-amber-700 px-3 py-1 rounded-lg border border-amber-200">
+                            0.0 Ha / Tanque
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Modelo Pulverizador</label>
+                            <input type="text" id="eq_modelo" placeholder="Ex: Jacto Uniport 3000" oninput="calcularCalibracao()" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Capac. Tanque (L)</label>
+                            <input type="number" id="eq_tanque" value="3000" oninput="calcularCalibracao()" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-bold text-agro-800">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Vazão (L/ha)</label>
+                            <input type="number" id="eq_vazao" value="60" oninput="calcularCalibracao()" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-bold text-agro-800">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Modelo de Bico</label>
+                            <input type="text" id="eq_bico" placeholder="Ex: AIXR 11002" oninput="atualizarPDF()" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Tipo de Gota</label>
+                            <input type="text" id="eq_gota" placeholder="Ex: Grossa / Muito Grossa" oninput="atualizarPDF()" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Pressão (PSI)</label>
+                            <input type="text" id="eq_pressao" placeholder="Ex: 40" oninput="atualizarPDF()" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 3: CONDIÇÕES AMBIENTAIS MÍNIMAS -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                    <h2 class="text-lg font-bold text-slate-800 border-b border-slate-100 pb-3 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-cloud-sun-rain text-agro-600"></i> Condições Ambientais Mínimas
+                    </h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Umidade Relativa (%)</label>
+                            <input type="text" id="clima_umidade" placeholder="Ex: > 55%" oninput="atualizarPDF()" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Veloc. Vento (km/h)</label>
+                            <input type="text" id="clima_vento" placeholder="Ex: 3 - 10 km/h" oninput="atualizarPDF()" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Temperatura (°C)</label>
+                            <input type="text" id="clima_temp" placeholder="Ex: < 30 °C" oninput="atualizarPDF()" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 4: CATÁLOGO DE PRODUTOS (ATÉ 10 ITENS) -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                    <div class="flex justify-between items-center border-b border-slate-100 pb-3 mb-4">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                <i class="fa-solid fa-flask-vial text-agro-600"></i> Produtos Recomendados (Página 1)
+                            </h2>
+                            <p class="text-xs text-slate-500">Busca na base de produtos cadastrados da planilha</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span id="contador_produtos_badge" class="text-xs font-extrabold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-200">
+                                0 / 10
+                            </span>
+                            <button id="btn_add_produto" onclick="adicionarProdutoLinha()" class="px-3 py-1.5 bg-agro-600 hover:bg-agro-700 text-white font-semibold text-xs rounded-lg transition flex items-center gap-1 shadow">
+                                <i class="fa-solid fa-plus"></i> Adicionar Produto
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="container-produtos" class="space-y-4">
+                        <!-- Linhas de produtos criadas dinamicamente via JS (Máximo 10) -->
+                    </div>
+                </div>
+
+                <!-- CARD 5: INSERÇÃO DE IMAGENS -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                    <div class="flex justify-between items-center border-b border-slate-100 pb-3 mb-4">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                <i class="fa-solid fa-images text-agro-600"></i> Imagens de Campo / Anexos
+                            </h2>
+                            <p class="text-xs text-slate-500">Adicione fotos de sintomas, pragas ou do talhão para o relatório</p>
+                        </div>
+                        <label class="px-3 py-1.5 bg-agro-600 hover:bg-agro-700 text-white font-semibold text-xs rounded-lg transition flex items-center gap-1 cursor-pointer shadow">
+                            <i class="fa-solid fa-upload"></i> Selecionar Fotos
+                            <input type="file" id="input_imagens" accept="image/*" multiple onchange="carregarImagens(event)" class="hidden">
+                        </label>
+                    </div>
+
+                    <div id="container_preview_imagens" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div class="col-span-full text-center text-xs text-slate-400 py-4 border border-dashed border-slate-200 rounded-xl">
+                            Nenhuma imagem adicionada
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 6: RESPONSÁVEIS & OBSERVAÇÕES TÉCNICAS -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                    <h2 class="text-lg font-bold text-slate-800 border-b border-slate-100 pb-3 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-clipboard-check text-agro-600"></i> Responsáveis & Observações Técnicas
+                    </h2>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Responsável Técnico</label>
+                            <input type="text" id="resp_tecnico" placeholder="Eng. Agrônomo / CREA" oninput="atualizarPDF()" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Responsável Operacional</label>
+                            <input type="text" id="resp_operacional" placeholder="Produtor / Gerente" oninput="atualizarPDF()" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Observações Gerais / Instruções de Campo</label>
+                        <textarea id="obs_tecnica" rows="4" placeholder="Escreva aqui observações importantes sobre a aplicação, pragas alvo, horários recomendados, cuidados com derivas, etc..." oninput="atualizarPDF()" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-agro-500 focus:outline-none"></textarea>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- PREVIEW DO RELATÓRIO PDF (5 COLUNAS) -->
+            <div class="lg:col-span-5">
+                <div class="sticky top-6">
+                    <div class="bg-slate-800 text-slate-200 p-3 rounded-t-2xl text-xs font-semibold flex justify-between items-center no-print">
+                        <span><i class="fa-solid fa-eye text-emerald-400 mr-1"></i> Visualização A4 em Tempo Real</span>
+                    </div>
+
+                    <!-- FOLHA DO RELATÓRIO -->
+                    <div id="printable-report" class="bg-white p-6 rounded-b-2xl shadow-xl border border-slate-300 text-xs text-slate-900 leading-tight">
+                        
+                        <!-- LOGO E CABEÇALHO DO RELATÓRIO ORIGENS -->
+                        <div class="border-2 border-slate-800 p-3 mb-3 bg-slate-50 flex items-center justify-between gap-4">
+                            <div class="w-1/3 flex justify-start">
+                                <svg class="h-12 w-auto fill-slate-900" viewBox="0 0 320 160" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M 160 8 C 146 28 148 46 160 60 C 172 46 174 28 160 8 Z" />
+                                    <path d="M 152 48 C 130 28 110 36 98 44 C 118 54 138 54 152 48 Z" />
+                                    <path d="M 168 48 C 190 28 210 36 222 44 C 202 54 182 54 168 48 Z" />
+                                    <rect x="85" y="66" width="150" height="5" rx="1" />
+                                    <rect x="88" y="75" width="144" height="5" rx="1" />
+                                    <rect x="95" y="84" width="130" height="5" rx="1" />
+                                    <path d="M 106 93 C 120 107 140 113 160 113 C 180 113 200 107 214 93 L 207 93 C 195 103 179 108 160 108 C 141 108 125 103 113 93 Z" />
+                                    <path d="M 158 52 L 162 52 L 162 95 L 158 95 Z" />
+                                    <path d="M 158 85 L 160 110 L 162 85 Z" />
+                                    <path d="M 159 75 Q 140 87 125 93 L 127 96 Q 142 90 160 80 Z" />
+                                    <path d="M 161 75 Q 180 87 195 93 L 193 96 Q 178 90 160 80 Z" />
+                                    <path d="M 159 85 Q 148 97 138 103 L 140 105 Q 150 99 160 88 Z" />
+                                    <path d="M 161 85 Q 172 97 182 103 L 180 105 Q 170 99 160 88 Z" />
+                                    <text x="160" y="138" text-anchor="middle" font-family="'Plus Jakarta Sans', sans-serif" font-weight="800" font-size="26" letter-spacing="4">ORIGENS</text>
+                                    <text x="160" y="154" text-anchor="middle" font-family="'Plus Jakarta Sans', sans-serif" font-weight="600" font-size="10" letter-spacing="2">Parcerias Agrícolas</text>
+                                </svg>
+                            </div>
+                            <div class="w-2/3 text-right">
+                                <h2 class="text-base font-extrabold text-slate-900 tracking-wide uppercase">RELATÓRIO DE VISITA TÉCNICA</h2>
+                                <p class="text-[10px] text-slate-600 font-semibold">RECOMENDAÇÃO DE APLICAÇÃO DE DEFENSIVOS</p>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center border-b-2 border-slate-800 pb-1.5 mb-2 font-bold text-[11px]">
+                            <span>FAZENDA: <span id="pdf_fazenda" class="text-agro-800 uppercase">---</span></span>
+                            <span>RECOMENDAÇÃO Nº <span id="pdf_rec_num" class="text-red-600">01</span></span>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-x-2 gap-y-1 mb-3 text-[10px] bg-slate-50 p-2 border border-slate-200 rounded">
+                            <div class="col-span-2"><strong>TALHÃO(ÕES):</strong> <span id="pdf_talhao">---</span></div>
+                            <div><strong>ÁREA TOTAL (ha):</strong> <span id="pdf_area">0</span></div>
+                            <div><strong>CULTURA:</strong> <span id="pdf_cultura">---</span></div>
+                            <div><strong>DATA VISITA:</strong> <span id="pdf_data_atual">---</span></div>
+                            <div><strong>DATA APLICAÇÃO:</strong> <span id="pdf_data_aplicacao">---</span></div>
+                            <div><strong>ESTÁGIO:</strong> <span id="pdf_estagio">---</span></div>
+                            <div><strong>OBJETIVO:</strong> <span id="pdf_objetivo">---</span></div>
+                        </div>
+
+                        <!-- SEÇÃO DE CALIBRAÇÃO NO RELATÓRIO -->
+                        <div class="mb-3">
+                            <div class="bg-slate-800 text-white font-bold px-2 py-0.5 text-[9px] uppercase tracking-wider mb-1">
+                                ESPECIFICAÇÕES DA CALIBRAÇÃO DO EQUIPAMENTO
+                            </div>
+                            <div class="grid grid-cols-3 gap-1 text-[9.5px] border border-slate-200 p-1.5 bg-slate-50">
+                                <div><strong>MODELO:</strong> <span id="pdf_eq_modelo">---</span></div>
+                                <div><strong>CAP. TANQUE:</strong> <span id="pdf_eq_tanque">0</span> L</div>
+                                <div><strong>VAZÃO:</strong> <span id="pdf_eq_vazao">0</span> L/ha</div>
+                                <div><strong>BICO:</strong> <span id="pdf_eq_bico">---</span></div>
+                                <div><strong>TIPO GOTA:</strong> <span id="pdf_eq_gota">---</span></div>
+                                <div><strong>PRESSÃO:</strong> <span id="pdf_eq_pressao">---</span> PSI</div>
+                                <div class="col-span-3 bg-amber-50 p-1 font-bold text-amber-900 border-t border-slate-200 text-center">
+                                    RENDIMENTO CALCULADO: <span id="pdf_eq_ha_tanque">0.0</span> HA / TANQUE
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SEÇÃO DE CONDIÇÕES AMBIENTAIS NO RELATÓRIO -->
+                        <div class="mb-3">
+                            <div class="bg-slate-800 text-white font-bold px-2 py-0.5 text-[9px] uppercase tracking-wider mb-1">
+                                CONDIÇÕES AMBIENTAIS MÍNIMAS PARA APLICAÇÃO
+                            </div>
+                            <div class="grid grid-cols-3 gap-1 text-[9.5px] border border-slate-200 p-1.5 bg-slate-50">
+                                <div><strong>UMIDADE:</strong> <span id="pdf_clima_umidade">---</span></div>
+                                <div><strong>VENTO:</strong> <span id="pdf_clima_vento">---</span></div>
+                                <div><strong>TEMP.:</strong> <span id="pdf_clima_temp">---</span></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="bg-slate-800 text-white font-bold px-2 py-0.5 text-[9px] uppercase tracking-wider mb-1 flex justify-between items-center">
+                                <span>PRODUTOS RECOMENDADOS</span>
+                                <span id="pdf_prod_count" class="text-[8px] text-emerald-300 font-mono">0 / 10 Itens</span>
+                            </div>
+                            <table class="w-full text-left border-collapse border border-slate-300 text-[8.5px]">
+                                <thead>
+                                    <tr class="bg-slate-200 text-slate-800 font-bold border-b border-slate-300">
+                                        <th class="p-1 border-r border-slate-300">PRODUTO</th>
+                                        <th class="p-1 border-r border-slate-300">CATEGORIA</th>
+                                        <th class="p-1 border-r border-slate-300 text-right">DOSE (/ha)</th>
+                                        <th class="p-1 border-r border-slate-300 text-right bg-emerald-100">TOTAL / TANQUE</th>
+                                        <th class="p-1">UNID.</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pdf_tabela_produtos">
+                                    <tr><td colspan="5" class="p-2 text-center text-slate-400">Nenhum produto adicionado</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- EXIBIÇÃO DAS IMAGENS NO RELATÓRIO -->
+                        <div id="pdf_secao_imagens" class="mb-3 hidden">
+                            <div class="bg-slate-800 text-white font-bold px-2 py-0.5 text-[9px] uppercase tracking-wider mb-1">
+                                REGISTRO FOTOGRÁFICO DE CAMPO
+                            </div>
+                            <div id="pdf_grid_imagens" class="grid grid-cols-2 gap-2 border border-slate-200 p-1.5 bg-slate-50">
+                                <!-- Imagens carregadas dinamicamente -->
+                            </div>
+                        </div>
+
+                        <!-- OBSERVAÇÕES TÉCNICAS NO RELATÓRIO -->
+                        <div class="mb-3">
+                            <div class="bg-slate-800 text-white font-bold px-2 py-0.5 text-[9px] uppercase tracking-wider mb-1">
+                                OBSERVAÇÕES TÉCNICAS
+                            </div>
+                            <div id="pdf_obs_tecnica" class="border border-slate-200 p-2 bg-slate-50 text-[9px] text-slate-700 min-h-[40px] whitespace-pre-line">
+                                Nenhuma observação inserida.
+                            </div>
+                        </div>
+
+                        <!-- PRECAUÇÕES DE USO E SEGURANÇA -->
+                        <div class="mb-3">
+                            <div class="bg-slate-800 text-white font-bold px-2 py-0.5 text-[8.5px] uppercase tracking-wider mb-1">
+                                PRECAUÇÕES DE USO E SEGURANÇA
+                            </div>
+                            <ol class="list-decimal pl-3.5 text-[7.5px] text-slate-700 space-y-0.5 leading-tight font-medium">
+                                <li>Antes de iniciar o manuseio dos produtos, leia atenciosamente as instruções do rótulo e/ou bula.</li>
+                                <li>Use os equipamentos de proteção individual (EPI) recomendados.</li>
+                                <li>Ao fazer a aferição do equipamento de aplicação, utilize água limpa e verifique se há vazamentos.</li>
+                                <li>Faça a tríplice lavagem ou lavagem sob pressão das embalagens vazias e descarte corretamente.</li>
+                                <li>Não reutilize a embalagem vazia. Mantenha sobras nas embalagens originais fechadas em local trancado.</li>
+                                <li>Não coma, não beba e não fume durante o manuseio do produto. Não manuseie com mãos desprotegidas.</li>
+                                <li>Após o manuseio/aplicação dos produtos tome banho, troque e lave as suas roupas.</li>
+                            </ol>
+                        </div>
+
+                        <!-- RESPONSÁVEIS -->
+                        <div class="grid grid-cols-2 gap-4 border-t border-slate-300 pt-3 mt-4 text-[9px]">
+                            <div class="text-center">
+                                <div class="border-t border-slate-400 pt-0.5 font-bold uppercase" id="pdf_resp_tecnico">RESPONSÁVEL TÉCNICO</div>
+                                <div class="text-[8px] text-slate-500">Engenheiro Agrônomo / CREA</div>
+                            </div>
+                            <div class="text-center flex flex-col justify-end">
+                                <div class="border-t border-slate-400 pt-0.5 font-bold uppercase" id="pdf_resp_operacional">RESPONSÁVEL OPERACIONAL</div>
+                                <div class="text-[8px] text-slate-500">Produtor / Cliente</div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- JS APP LOGIC -->
+    <script>
+        // BASE DE DADOS COMPLETA DAS FAZENDAS E TALHÕES COM SEUS HECTARES
+        const FAZENDAS_DB = {
+            'AgroChapada': [
+                { talhao: 'S 77', area: 261 }, { talhao: 'S 78', area: 80 }, { talhao: 'S 79', area: 173 }, { talhao: 'S 80', area: 196 },
+                { talhao: 'S 81', area: 99 }, { talhao: 'S 82', area: 174 }, { talhao: 'S 83', area: 59 }, { talhao: 'S 84', area: 400 },
+                { talhao: 'S 84 B', area: 144 }, { talhao: 'S 85', area: 205 }, { talhao: 'S 86', area: 273 }, { talhao: 'S 87', area: 96 },
+                { talhao: 'S 88', area: 134 }, { talhao: 'S 89', area: 158 }, { talhao: 'S 90', area: 147 }, { talhao: 'S 91', area: 118 },
+                { talhao: 'JG 01', area: 166 }, { talhao: 'JG 02', area: 236 }, { talhao: 'JG 03', area: 185 }, { talhao: 'JG 09', area: 217 },
+                { talhao: 'TO 4', area: 274 }, { talhao: 'TO 5', area: 272 }, { talhao: 'TO 6', area: 158 }, { talhao: 'TO 11', area: 305 },
+                { talhao: 'SJ 1A', area: 140 }, { talhao: 'SJ 1B', area: 157 }, { talhao: 'SJ 2B', area: 415 }, { talhao: 'SJ 3', area: 322 }
+            ],
+            'Flórida': [
+                { talhao: 'TH01A', area: 101 }, { talhao: 'TH01B', area: 78 }, { talhao: 'TH02', area: 90 },
+                { talhao: 'TH03', area: 130 }, { talhao: 'TH04', area: 174 }, { talhao: 'TH05A', area: 146 }, { talhao: 'TH05B', area: 69 }, { talhao: 'TH07', area: 75 }, { talhao: 'TH08', area: 64 },
+                { talhao: 'TH09A', area: 80 }, { talhao: 'TH09B', area: 109 }, { talhao: 'TH011', area: 130 }, { talhao: 'TH012', area: 81 }, 
+                { talhao: 'TH013', area: 66 }, { talhao: 'TH010', area: 97 }
+            ],
+            'Horizonte': [
+                { talhao: 'TH01', area: 10 }, { talhao: 'TH02', area: 100 }, { talhao: 'TH03', area: 130 },
+                { talhao: 'TH04', area: 75 }, { talhao: 'TH05A', area: 122 }, { talhao: 'TH05B', area: 43 },
+                { talhao: 'TH06', area: 25 }, { talhao: 'TH07', area: 10 }, { talhao: 'TH08', area: 11 },
+                { talhao: 'TH08', area: 12 }, { talhao: 'TH09', area: 12 }, { talhao: 'TH10', area: 11 },
+                { talhao: 'TH13', area: 120 }, { talhao: 'TH14', area: 88 }, { talhao: 'TH15A', area: 44 }, { talhao: 'TH15B', area: 3 }
+            ],
+            'Juanita': [
+                { talhao: 'TH01', area: 100 }, { talhao: 'TH02', area: 242 }, { talhao: 'TH03', area: 176 },
+                { talhao: 'TH04', area: 272 }, { talhao: 'TH05', area: 235 }, { talhao: 'TH06', area: 106 }
+            ],
+            'Miyata': [
+                { talhao: 'TH01', area: 75 }, { talhao: 'TH02', area: 127 }, { talhao: 'TH03', area: 164 },
+                { talhao: 'TH04', area: 58 }, { talhao: 'TH05', area: 69 }, { talhao: 'TH06', area: 65 },
+                { talhao: 'TH07A', area: 68 }, { talhao: 'TH07B', area: 80 }, { talhao: 'TH08A', area: 72 }, { talhao: 'TH08B', area: 99 }, { talhao: 'TH09', area: 75 }, 
+                { talhao: 'TH010', area: 115 }
+            ],
+            'Porto_Seguro': [
+                { talhao: 'PSP', area: 106 }, { talhao: 'PS1', area: 206 }, { talhao: 'PS2', area: 142 },
+                { talhao: 'PS3', area: 220 }, { talhao: 'PS4', area: 245 }, { talhao: 'PS5', area: 40 },
+                { talhao: 'PS6', area: 153 }, { talhao: 'PS0', area: 80 }, { talhao: 'PS0B', area: 112 },
+                { talhao: 'Q1', area: 59 }, { talhao: 'Q2', area: 45 }, { talhao: 'Q4', area: 152 },
+                { talhao: 'A1', area: 133 }, { talhao: 'A2', area: 28 }, { talhao: 'A3', area: 86 },
+                { talhao: 'A4', area: 65 }, { talhao: 'Q3', area: 180 }
+            ],
+            'Recreio': [
+                { talhao: 'RC 1', area: 280 }, { talhao: 'RC 2', area: 280 }, { talhao: 'RC 3', area: 286 },
+                { talhao: 'RC 4', area: 304 }, { talhao: 'RC 5', area: 179 }, { talhao: 'RC 6', area: 91 }
+            ],
+            'Suez': [
+                { talhao: 'TH108', area: 108 }, { talhao: 'TH116', area: 58 }, { talhao: 'TH126', area: 63 },
+                { talhao: 'TH191', area: 191 }, { talhao: 'TH199B', area: 199 }, { talhao: 'TH345', area: 345 }
+            ]
+        };
+
+        // BASE DE PRODUTOS CADASTRADA DA PLANILHA
+        const CATALOGO_PRODUTOS = [
+            {"nome": "Abacus", "categoria": "Fungicida", "conc": "epoxiconazol (triazol) + piraclostrobina (estrobilurina)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=183849&p_nm_file=F949690604/ABACUS_HC_bula_rev01_20.04.2018.pdf"},
+            {"nome": "Accent", "categoria": "Herbicida", "conc": "nicossulfurom (sulfoniluréia)", "unid": "kg", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=159704&p_nm_file=F877211500/Bula_Accent_R3%20-%2021-11-%2017.pdf"},
+            {"nome": "Agris", "categoria": "Defensivo", "conc": "", "unid": "litro", "bula": ""},
+            {"nome": "Actara 250 WG", "categoria": "Inseticida", "conc": "tiametoxam (neonicotinóide)", "unid": "kg", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=190255&p_nm_file=F1897197454/ACTARA%20250%20WG_BulaCompleta_exclus%E3o%20cultura.pdf"},
+            {"nome": "Agral", "categoria": "Adjuvante", "conc": "Etilenoxi", "unid": "litro", "bula": "https://www.syngenta.com.br/sites/g/files/zhg256/f/agral.pdf?token=1511171921"},
+            {"nome": "Akito", "categoria": "Inseticida", "conc": "Beta-Cipermetrina (piretróide)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=154466&p_nm_file=F1939859332/Akito_Bula_MAPA%20(2017%2010%2018%20).pdf"},
+            {"nome": "Ampligo", "categoria": "Inseticida", "conc": "Clorantraniliprole (antranilamida) + lambda-cialotrina (piretróide)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=178544&p_nm_file=F2001279946/AMPLIGO%20Bula%20Completa_Incl%20sorgo%20e%20alvo%20soja.pdf"},
+            {"nome": "Ampligo PRO", "categoria": "Acaricida, Inseticida", "conc": "abamectina (avermectina) + clorantraniliprole (antranilamida)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=190316&p_nm_file=F274761076/AMPLIGO%20PRO_BulaCompletaIN16.pdf"},
+            {"nome": "Applaud 250", "categoria": "Inseticida, Regulador De Crescimento", "conc": "buprofezina (tiadiazinona)", "unid": "kg", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=189747&p_nm_file=F405987527/Applaud%20250%20Bula_vers%E3o%2006%2006%2018.pdf"},
+            {"nome": "Aproach Prima", "categoria": "Fungicida", "conc": "ciproconazol (triazol) + Picoxistrobina (estrobilurina)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=160150&p_nm_file=F787740966/Bula_AproachPrima_R5%20-%2021-11-17.pdf"},
+            {"nome": "Apron RFC", "categoria": "Fungicida", "conc": "fludioxonil (fenilpirrol) + metalaxil-M (acilalaninato)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=191072&p_nm_file=F1863570158/APRON%20RFC%20BulaCompleta_IN16.pdf"},
+            {"nome": "Assist", "categoria": "Acaricida, Inseticida", "conc": "óleo mineral (hidrocarbonetos alifáticos)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=151622&p_nm_file=F1535111633/Assist_Bula_rev00_10.08.2017_ty.pdf"},
+            {"nome": "Atabron", "categoria": "Inseticida", "conc": "clorfluazurom (benzoiluréia)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=181547&p_nm_file=F924846841/Bula_ATABRON%2050EC_0-3.pdf"},
+            {"nome": "Atento", "categoria": "Fungicida", "conc": "(FLUQUINCONAZOL)", "unid": "litro", "bula": "https://www.agro.bayer.com.br/-/media/bcs-inter/ws_brazil/files/atento/atento-bula.pdf"},
+            {"nome": "Ativum", "categoria": "Fungicida", "conc": "epoxiconazol (triazol) + fluxapiroxade (carboxamida) + piraclostrobina (estrobilurina)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=183847&p_nm_file=F1459627164/ATIVUM_bula_rev01_16.03.2018.pdf"},
+            {"nome": "Aureo", "categoria": "Óleo Mineral S/A", "conc": "Éster metílico de óleo de soja", "unid": "litro", "bula": "https://www.agro.bayer.com.br/-/media/bcs-inter/ws_brazil/files/aureo/aureo-bula.pdf"},
+            {"nome": "Aurora", "categoria": "Herbicida", "conc": "carfentrazona-etílica (triazolona)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=157021&p_nm_file=F1623488826/Bula%20-%20AURORA%20-%20Adequac%26%23807%3Ba%26%23771%3Bo%20IN16%20-%2010out2017.pdf"},
+            {"nome": "Avatar", "categoria": "Inseticida", "conc": "indoxacarbe (oxadiazina)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=172204&p_nm_file=F764139548/Bula%20-%20Avatar%20-%2026-02-2018.pdf"},
+            {"nome": "Avaunt 150", "categoria": "Inseticida", "conc": "indoxacarbe (oxadiazina)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=155325&p_nm_file=F1948943409/Bula%20-%20Avaunt%20150%20-%2027-10-2017.pdf"},
+            {"nome": "Avicta", "categoria": "Inseticida, Nematicida", "conc": "abamectina (avermectina)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=192327&p_nm_file=F2044800141/AVICTA%20500%20FS_Bula%20Completa_inclus%E3o%20feij%E3o.pdf"},
+            {"nome": "Ballveria", "categoria": "Inseticida Microbiológico", "conc": "Beauveria bassiana (biológico)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=178124&p_nm_file=F44420671/Bula%20Ballv%E9ria%20vers%E3o%2027_03_18.pdf"},
+            {"nome": "Basagran 600", "categoria": "Herbicida", "conc": "bentazona (benzotiadiazinona)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=173586&p_nm_file=F1609706119/Basagran%20600-Bula_rev.01_01.12.2017.pdf"},
+            {"nome": "Battus", "categoria": "Inseticida", "conc": "acetamiprido (neonicotinóide)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=154498&p_nm_file=F866512677/Battus_Bula_MAPA%20(2017%2010%2018%20).pdf"},
+            {"nome": "Baytan", "categoria": "Fungicida", "conc": "triadimenol (triazol)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=168706&p_nm_file=F1113342468/Baytan%20FS_BULA.pdf"},
+            {"nome": "Belt", "categoria": "Inseticida", "conc": "Flubendiamida (Diamida do ácido ftálico)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=154175&p_nm_file=F469472042/Belt_Bula_Agrofit%202_Inc%20cultura_11.10.17.docx.pdf"},
+            {"nome": "Benevia", "categoria": "Inseticida", "conc": "Ciantraniliprole (antranilamida)", "unid": "kg", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=173985&p_nm_file=F334548135/Bula%20-%20Benevia%20-%2006-03-2018.pdf"},
+            {"nome": "Blitz", "categoria": "Formicida", "conc": "Fipronil (pirazol)", "unid": "kg", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=186847&p_nm_file=F1747151945/BLITZ_bula_rev01_14.05.2018.pdf"},
+            {"nome": "Boral", "categoria": "Herbicida", "conc": "Sulfentrazona (triazolona)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=158990&p_nm_file=F565041772/Bula%20BORAL%20500%20SC%20-%20Adequac%26%23807%3Ba%26%23771%3Bo%20IN16%2019set2017.pdf"},
+            {"nome": "Break-thu", "categoria": "Espalhante Adesivo", "conc": "Copolímero poliéter – polimetil siloxano", "unid": "litro", "bula": "http://www.adapar.pr.gov.br/arquivos/File/defis/DFI/Bulas/Outros/break.pdf"},
+            {"nome": "BrilhanteBR", "categoria": "Inseticida", "conc": "Metomil (metilcarbamato de oxima)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=180827&p_nm_file=F1620090846/Bula_BrilhanteBR_23.03.2018V.02.pdf"},
+            {"nome": "Bulldock 125 SC", "categoria": "Inseticida", "conc": "Beta-ciflutrina (piretróide)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=165406&p_nm_file=F1265595198/BULLDOCK%20125%20SC_BULA.pdf"},
+            {"nome": "Cartap", "categoria": "Fungicida, Inseticida", "conc": "Cloridrato de cartape (bis(tiocarbamato))", "unid": "kg", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=192809&p_nm_file=F107534926/Cartap%20BR%20500%20-%20Bula%2026.06.18%20rev01.pdf"},
+            {"nome": "Certero", "categoria": "Inseticida", "conc": "Triflumurom (benzoiluréia)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=149947&p_nm_file=F472909119/Certero_Bula_Agrofit%201_IN16_11.09.2017.pdf"},
+            {"nome": "Classic", "categoria": "Herbicida", "conc": "Clorimurom-etílico (sulfoniluréia)", "unid": "kg", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=159725&p_nm_file=F1290312102/Bula_Classic_R3%20-%2020-11-17.pdf"},
+            {"nome": "Cobra", "categoria": "Herbicida", "conc": "Lactofem", "unid": "litro", "bula": "http://www.adapar.pr.gov.br/arquivos/File/defis/DFI/Bulas/Herbicidas/COBRA.pdf"},
+            {"nome": "CoMo", "categoria": "Defensivo", "conc": "", "unid": "litro", "bula": ""},
+            {"nome": "Connect", "categoria": "Inseticida", "conc": "beta-ciflutrina (piretróide) + imidacloprido (neonicotinóide)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=174729&p_nm_file=F1857623464/Connect_Bula_Agrofit%202_Atualiza%E7%E3o%20endere%E7o_27.02.2018.pdf"},
+            {"nome": "Crop Star", "categoria": "Inseticida", "conc": "imidacloprido (neonicotinóide) + tiodicarbe (metilcarbamato de oxima)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=190048&p_nm_file=F1087098232/CROPSTAR_Bula_Agrofit_Atualiza%E7%E3o%20das%20recomenda%E7%F5es%20em%20soja_07.06.2018.pdf"},
+            {"nome": "Cruiser 350 FS", "categoria": "Inseticida", "conc": "tiametoxam (neonicotinóide)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=192388&p_nm_file=F1021703322/CRUISER%20350%20FS_%20Bula%20Completa_Alt%20Raz%E3o%20social.pdf"},
+            {"nome": "Cruiser Advanced", "categoria": "Fungicida", "conc": "fludioxonil (fenilpirrol) + metalaxil-M (acilalaninato) + tiabendazol (benzimidazol) + tiametoxam (neonicotinóide)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=193047&p_nm_file=F652116356/CRUISER%20ADVANCED_%20Bula%20Completa_27.06.2018.pdf"},
+            {"nome": "Curyom 550 CE", "categoria": "Inseticida", "conc": "lufenurom (benzoiluréia) + profenofós (organofosforado)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=153073&p_nm_file=F595433114/CURYOM%20550%20EC_BulaCompleta_IN%2016.pdf"},
+            {"nome": "Dermacor", "categoria": "Inseticida", "conc": "clorantraniliprole (antranilamida)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=190308&p_nm_file=F20937069/Bula%20-%20Dermacor%20-%2011-06-2018.pdf"},
+            {"nome": "Derosal 500", "categoria": "Fungicida", "conc": "carbendazim (benzimidazol)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=153126&p_nm_file=F485847634/Derosal%20500%20SC_Vers%E3o%20Final.pdf"},
+            {"nome": "Derosal Plus", "categoria": "Fungicida", "conc": "carbendazim (benzimidazol) + tiram (dimetilditiocarbamato)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=152752&p_nm_file=F544110850/Derosal%20Plus_Bula_AGROFIT%201_IN%2016_20.09.2017.pdf"},
+            {"nome": "Difere", "categoria": "Fungicida", "conc": "oxicloreto de cobre (inorgânico)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=165730&p_nm_file=F576666886/DIFERE%2009-01-2018.pdf"},
+            {"nome": "Dipel", "categoria": "Inseticida Microbiológico", "conc": "Bacillus thuringiensis (Produto Microbiológico)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=169027&p_nm_file=F244444954/Dipel%20-%20Bula%2001.02.18%20rev01.pdf"},
+            {"nome": "DMA 806 BR", "categoria": "Herbicida", "conc": "2,4-D-dimetilamina (ácido ariloxialcanóico)", "unid": "kg", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=167050&p_nm_file=F1473959820/Bula_DMA%20806%20BR_AGROFIT_2017_11_14.pdf"},
+            {"nome": "Domark 100 EC", "categoria": "Fungicida", "conc": "tetraconazol (triazol)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=191134&p_nm_file=F712676982/DOMARK%20100%20EC_BulaCompleta_IN16_atualizada.pdf"},
+            {"nome": "Domark Excell", "categoria": "Fungicida", "conc": "azoxistrobina (estrobilurina) + tetraconazol (triazol)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=176949&p_nm_file=F274213921/Domark%20EXCELL%20_BulaCompleta_exclus%E3o%20PT%20azox.pdf"},
+            {"nome": "Domina", "categoria": "Defensivo", "conc": "", "unid": "litro", "bula": ""},
+            {"nome": "Dropp Ultra", "categoria": "Herbicida", "conc": "diurom (uréia) + tidiazurom (uréia)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=150016&p_nm_file=F1715496643/Dropp%20Ultra%20SC_Bula_Agrofit%2001_IN16_11.09.2017.pdf"},
+            {"nome": "Dual Gold", "categoria": "Herbicida", "conc": "metolacloro (cloroacetanilida)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=153455&p_nm_file=F955126302/DUAL%20GOLD_BulaCompleta_Revis%E3o%20IS%20da%20uva.pdf"},
+            {"nome": "Dynasty", "categoria": "Fungicida", "conc": "azoxistrobina (estrobilurina) + fludioxonil (fenilpirrol) + metalaxil-M (acilalaninato)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=193007&p_nm_file=F980832867/DYNASTY_BULA%20COMPLETA_27.06.2018.pdf"},
+            {"nome": "Ecotrich", "categoria": "Fungicida Microbiológico", "conc": "Trichoderma harzianum (biológico)", "unid": "kg", "bula": ""},
+            {"nome": "Elatus", "categoria": "Fungicida", "conc": "azoxistrobina (estrobilurina) + Benzovindiflupyr (pirazol carboxamida)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=160684&p_nm_file=F1189831128/ELATUS_Bula%20Completa_Ferrugem%20da%20Soja_18.10.2017_Corre%E7%E3o%20Ortogr%E1fica.pdf"},
+            {"nome": "Eminent 125 EW", "categoria": "Fungicida", "conc": "tetraconazol (triazol)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=183807&p_nm_file=F1846434133/Eminent%20125EW%20-%20bula(3).pdf"},
+            {"nome": "Eminent Excell", "categoria": "Fungicida", "conc": "azoxistrobina (estrobilurina) + tetraconazol (triazol)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=192107&p_nm_file=F1370355555/Eminent%20EXCELL%20_BulaCompleta_inclus%E3o%20arroz,%20feijao%20e%20trigo.pdf"},
+            {"nome": "Engeo Pleno", "categoria": "Inseticida", "conc": "lambda-cialotrina (piretróide) + tiametoxam (neonicotinóide)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=187007&p_nm_file=F511870897/ENGEO%20PLENO%20S%20BulaCompleta%20_Alt.%20outros%20ingredientes.pdf"},
+            {"nome": "Envoke", "categoria": "Herbicida", "conc": "trifloxissulfurom-sódico (sulfoniluréia)", "unid": "kg", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=148857&p_nm_file=F1053071800/ENVOKE_BulaCompleta_IN%2016.pdf"},
+            {"nome": "Epingle", "categoria": "Defensivo", "conc": "piriproxifem (éter piridiloxipropílico)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=149057&p_nm_file=F1817837710/Epingle%20100%20-%20%20Bula%2029.08.17%20rev00.pdf"},
+            {"nome": "Exalt", "categoria": "Inseticida", "conc": "Espinetoram (espinosinas)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=163385&p_nm_file=F710234562/Bula_AGROFIT_Exalt_2017_12_19.pdf"},
+            {"nome": "Fastac SC", "categoria": "Inseticida", "conc": "alfa-cipermetrina (piretróide)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=183869&p_nm_file=F1887314103/FASTAC_100_SC_bula_rev%2001_23.04.2018.pdf"},
+            {"nome": "Finish", "categoria": "Regulador De Crescimento", "conc": "etefom (etileno (precursor de))", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=150646&p_nm_file=F1459663711/Finish_Bula_Agrofit%2001_IN16_12.09.2017.pdf"},
+            {"nome": "Flex", "categoria": "Herbicida", "conc": "fomesafem (éter difenílico)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=152399&p_nm_file=F689858086/FLEX_BulaCompleta_IN%2016.pdf"},
+            {"nome": "Flumyzin", "categoria": "Herbicida", "conc": "flumioxazina (ciclohexenodicarboximida)", "unid": "kg", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=150050&p_nm_file=F1422650965/Flumyzin%20500%20-%20Bula%2011.09.17%20rev00.pdf"},
+            {"nome": "Fox", "categoria": "Fungicida", "conc": "Protioconazol (Triazolinthione) + trifloxistrobina (estrobilurina)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=186392&p_nm_file=F134559706/FOX_Bula_Agrofit_07.05.2018.pdf"},
+            {"nome": "Fox XPRO", "categoria": "Fungicida", "conc": "Bixafem (carboxamida) + Protioconazol (Triazolinthione) + trifloxistrobina (estrobilurina)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=186370&p_nm_file=F1470339210/FOX%20XPRO_Bula%20AGROFIT_Exclus%E3o%20de%20dose_08.05.18.pdf"},
+            {"nome": "Fury 400 CE", "categoria": "Inseticida", "conc": "zeta-cipermetrina (piretróide)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=158783&p_nm_file=F265404200/Bula%20FURY%20400%20EC%20-%20Adequac%26%23807%3Ba%26%23771%3Bo%20IN16%20-14nov2017.pdf"},
+            {"nome": "Fusiflex", "categoria": "Herbicida", "conc": "fluazifope-P-butílico (ácido ariloxifenoxipropiônico) + fomesafem (éter difenílico)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=163587&p_nm_file=F1821522974/FUSIFLEX_BulaCompleta_IN%2016_Corre%E7%E3o_de%20EC%20para%20SL.pdf"},
+            {"nome": "Fusilade", "categoria": "Herbicida", "conc": "fluazifope-P-butílico (ácido ariloxifenoxipropiônico)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=190468&p_nm_file=F1802157060/FUSILADE%20250%20EW_BulaCompleta_IN16.pdf"},
+            {"nome": "Galil", "categoria": "Inseticida", "conc": "bifentrina (piretróide) + imidacloprido (neonicotinóide)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=160157&p_nm_file=F788774892/BULA_GALIL_SC__13092017.pdf"},
+            {"nome": "Galileo Excell", "categoria": "Fungicida", "conc": "azoxistrobina (estrobilurina) + tetraconazol (triazol)", "unid": "kg", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=176947&p_nm_file=F916825078/GALILEO%20EXCEL_Bula%20Completa_exclus%E3o%20PT%20azox.pdf"},
+            {"nome": "Gallaxy", "categoria": "Inseticida", "conc": "novalurom (benzoiluréia)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=158870&p_nm_file=F1252232373/Gallaxy__100_EC_Bula_14112017.pdf"},
+            {"nome": "Game", "categoria": "Acaricida, Inseticida", "conc": "lufenurom (benzoiluréia)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=187587&p_nm_file=F201607282/04_Game_Bula_MAPA%20(2018%2005%2016).pdf"},
+            {"nome": "Gamit", "categoria": "Herbicida", "conc": "clomazona (isoxazolidinona)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=159291&p_nm_file=F954576136/Bula%20GAMIT%20-%20Adequac%26%23807%3Ba%26%23771%3Bo%20IN16%20-%2021Nov2017.pdf"},
+            {"nome": "Gesaprim 500", "categoria": "Herbicida", "conc": "atrazina (triazina)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=190371&p_nm_file=F594582941/GESAPRIM%20500%20CIBA%20GEIGY_BulaCompleta_IN16.pdf"},
+            {"nome": "Gladium", "categoria": "Herbicida", "conc": "etoxissulfurom (sulfoniluréia)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=159671&p_nm_file=F1147154311/Gladium_Bula_Agrofit%2002_DOU221_Inc.%20cultura%20(feij%E3o%20e%20cana)%2020.11.2017.pdf"},
+            {"nome": "Glifosato 360", "categoria": "Herbicida", "conc": "glifosato-sal de isopropilamina (glicina substituída)", "unid": "litro", "bula": ""},
+            {"nome": "Glifosato 480", "categoria": "Herbicida", "conc": "glifosato-sal de isopropilamina (glicina substituída)", "unid": "litro", "bula": ""},
+            {"nome": "Glifosato 720", "categoria": "Herbicida", "conc": "glifosato-sal de isopropilamina (glicina substituída)", "unid": "kg", "bula": ""},
+            {"nome": "Gramocil", "categoria": "Herbicida", "conc": "diurom (uréia) + Dicloreto de paraquate (bipiridílio)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=168290&p_nm_file=F893297897/GRAMOCIL_BulaCompleta_reavalia%E7%E3o(corrigida2).pdf"},
+            {"nome": "Gramoxone", "categoria": "Herbicida", "conc": "Dicloreto de paraquate (bipiridílio)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=166608&p_nm_file=F1497738002/Gramoxone%20200_BulaCompleta_reavali%E7%E3o(corrigida).pdf"},
+            {"nome": "Horos", "categoria": "Fungicida", "conc": "Picoxistrobina (estrobilurina) + tebuconazol (triazol)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=162632&p_nm_file=F440354618/BULA_HOROS_11122017.pdf"},
+            {"nome": "Iharol", "categoria": "Acaricida, Inseticida", "conc": "óleo mineral (hidrocarbonetos alifáticos)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=166455&p_nm_file=F1865966585/IHAROL_Bula_3103591.pdf"},
+            {"nome": "Imidacloprid 600", "categoria": "Inseticida", "conc": "imidacloprido (neonicotinóide)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=157114&p_nm_file=F1465993435/Imidacloprid%20600FS%20LL%2004609%20Ch1L%20Rev04%20ver%2010nov2017.pdf"},
+            {"nome": "Imidagold 700", "categoria": "Inseticida", "conc": "imidacloprido (neonicotinóide)", "unid": "kg", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=154477&p_nm_file=F1818496182/Imidagold%20700%20WG_Bula_MAPA%20(2017%2010%2018%20).pdf"},
+            {"nome": "Impact 125 SC", "categoria": "Fungicida", "conc": "flutriafol (triazol)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=158176&p_nm_file=F1864164780/Bula%20IMPACT%20125%20SC%20-%20Adequa%E7%E3o%20IN16%20-%2014nov2017.pdf"},
+            {"nome": "Impact Duo", "categoria": "Fungicida", "conc": "flutriafol (triazol) + tiofanato-metílico (benzimidazol (precursor de))", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=158068&p_nm_file=F924497836/Bula%20IMPACT%20DUO%20-%20Adequac%26%23807%3Ba%26%23771%3Bo%20IN16%20-%2014nov2017.pdf"},
+            {"nome": "Impact Plus", "categoria": "Fungicida", "conc": "carbendazim (benzimidazol) + flutriafol (triazol)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=158090&p_nm_file=F1732024285/Bula%20IMPACT%20PLUS%20-%20Adequac%26%23807%3Ba%26%23771%3Bo%20IN16%20-%2014nov2017..pdf"},
+            {"nome": "Inoculante", "categoria": "Defensivo", "conc": "", "unid": "litro", "bula": ""},
+            {"nome": "Intrepid 240 SC", "categoria": "Inseticida", "conc": "metoxifenozida (diacilhidrazina)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=180554&p_nm_file=F1294907362/Bula_AGROFIT_Intrepid%20240%20SC_2018_04_10.pdf"},
+            {"nome": "Intrepid Edge", "categoria": "Inseticida", "conc": "metoxifenozida (diacilhidrazina) + Espinetoram (espinosinas)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=182190&p_nm_file=F185545305/Bula_AGROFIT_Intrepid%20Edge_2018_03_27.pdf"},
+            {"nome": "Joint", "categoria": "Defensivo", "conc": "Óleo Mineral S/A", "unid": "litro", "bula": "http://www.dowagro.com/webapps/include/GetDoc.aspx?filepath=br/pdfs/noreg/013-05162.pdf&pdf=true"},
+            {"nome": "Karate Zeon 250 CE", "categoria": "Inseticida", "conc": "lambda-cialotrina (piretróide)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=148376&p_nm_file=F662488269/KARATE%20ZEON%20250%20CS_BulaCompleta%20IN16.pdf"},
+            {"nome": "Karmex 800 GrDA", "categoria": "Herbicida", "conc": "diurom (uréia)", "unid": "kg", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=159116&p_nm_file=F156945266/BULA_KARMEX_800_14112017.pdf"},
+            {"nome": "Lannate", "categoria": "Inseticida", "conc": "metomil (metilcarbamato de oxima)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=183430&p_nm_file=F1308021237/Bula%20-%20Lannate%20BR%20-%2024-04-2018%20final.pdf"},
+            {"nome": "Larvin 800 WG", "categoria": "Inseticida", "conc": "tiodicarbe (metilcarbamato de oxima)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=150477&p_nm_file=F1908613299/Larvin%20800WG_Bula_Agrofit%201_IN16_12.09.2017.pdf"},
+            {"nome": "Liberty", "categoria": "Herbicida", "conc": "Glufosinato - sal de amônio (homoalanina substituída)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=150131&p_nm_file=F1882081240/Liberty_Bula_Agrofit%2001_IN%2016_12.09.2017.pdf"},
+            {"nome": "Lorsban 480 BR", "categoria": "Acaricida, Inseticida", "conc": "clorpirifós (organofosforado)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=167707&p_nm_file=F532734528/Bula_AGROFIT_Lorsban%20480%20BR_2018_01_23.pdf"},
+            {"nome": "Luretape BW-10", "categoria": "Ferormonio", "conc": "Grandlure (I, II, III e IV) 15.14 g/kg", "unid": "kg", "bula": "http://www.biocontrole.com.br/produto/luretape-bw-10/"},
+            {"nome": "Mago", "categoria": "Defensivo", "conc": "", "unid": "litro", "bula": ""},
+            {"nome": "Malathion 1000 EC", "categoria": "Inseticida", "conc": "malationa (organofosforado)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=162515&p_nm_file=F805179133/Bula%20-%20MALATHION%201000%20EC%20CHEMINOVA-Adeq.%20IN16%20-Rev01-09nov17.pdf"},
+            {"nome": "Malathion Prentiss", "categoria": "Inseticida", "conc": "malationa (organofosforado)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=154064&p_nm_file=F2034948559/MALATHION%20Prentiss%20-%20bula%20Out%202017.pdf"},
+            {"nome": "Malathion UL", "categoria": "Inseticida", "conc": "malationa (organofosforado)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=158007&p_nm_file=F1055017980/Bula%20-%20MALATHION%20UL%20CHEMINOVA%20-%20Adequac%26%23807%3Ba%26%23771%3Bo%20IN16%20-%2026out2017.pdf"},
+            {"nome": "Mantrac", "categoria": "Defensivo", "conc": "", "unid": "litro", "bula": ""},
+            {"nome": "Marshal 400 SC", "categoria": "Acaricida, Inseticida", "conc": "carbosulfano (metilcarbamato de benzofuranila)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=171584&p_nm_file=F1080621818/Bula%20MARSHAL%20400%20SC%20-%20Excl.%20Arroz%2002fev2018.pdf"},
+            {"nome": "Marshal star", "categoria": "Acaricida, Inseticida, Nematicida", "conc": "carbosulfano (metilcarbamato de benzofuranila)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=158899&p_nm_file=F381002602/BLMARSHAL%20STAR%20-%20Adeq%20IN16,%20Ex%20cult%20e%20Aplic.%20Costal%20-%2031out2017.pdf"},
+            {"nome": "Master fix", "categoria": "Inoculante", "conc": "Inoculante", "unid": "litro", "bula": "https://www.stoller.com.br/solucoes/biologicos"},
+            {"nome": "Match CE", "categoria": "Inseticida", "conc": "lufenurom (benzoiluréia)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=191071&p_nm_file=F1693718379/MATCH%20EC_Bula%20Completa_IN16.pdf"},
+            {"nome": "Maxim XL", "categoria": "Fungicida", "conc": "fludioxonil (fenilpirrol) + metalaxil-M (acilalaninato)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=190392&p_nm_file=F1721930527/MAXIM%20XL_BULA%20COMPLETA_IN16.pdf"},
+            {"nome": "Mertin 400", "categoria": "Fungicida", "conc": "hidróxido de fentina (organoestânico)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=153238&p_nm_file=F427195987/Mertin%20400%20-%20Bula%20Completa%20IN%2016.pdf"},
+            {"nome": "Moss", "categoria": "Defensivo", "conc": "", "unid": "litro", "bula": ""},
+            {"nome": "Nativo", "categoria": "Fungicida", "conc": "tebuconazol (triazol) + trifloxistrobina (estrobilurina)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=189787&p_nm_file=F1620239787/Nativo_Bula%20AGROFIT_Altera%E7%E3o%2002_06.06.18.pdf"},
+            {"nome": "Nemat", "categoria": "Nematicida Microbiológico", "conc": "Paecilomyces lilacinus (biológico)", "unid": "kg", "bula": ""},
+            {"nome": "Nimbus", "categoria": "Adjuvante", "conc": "Óleo Mineral S/A", "unid": "litro", "bula": "https://www.syngenta.com.br/sites/g/files/zhg256/f/nimbus.pdf?token=1511171921"},
+            {"nome": "Noctovi", "categoria": "Defensivo", "conc": "", "unid": "litro", "bula": ""},
+            {"nome": "Nodulus Premium 125", "categoria": "CoMo", "conc": "Fert. Foliar", "unid": "litro", "bula": "http://biosoja.com.br/produto-nht-como-nodulus-premium.php"},
+            {"nome": "Nomolt", "categoria": "Inseticida", "conc": "teflubenzurom (benzoiluréia)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=166064&p_nm_file=F464673235/NOMOLT_150_bula_rev01_11.01.2018.pdf"},
+            {"nome": "Oberon", "categoria": "Acaricida, Inseticida", "conc": "Espiromesifeno (cetoenol)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=147859&p_nm_file=F1276767460/Oberon_Bula_IN16%20+%20Inc.%20culturas_DOU%20n.%20159%20de%2018.08.2017.pdf"},
+            {"nome": "Onix", "categoria": "Nematicida Microbiológico", "conc": "Bacillus methilotrophicus (Produto Biológico)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=188008&p_nm_file=F1963376604/BULA%20ONIX%205L%20NOVO%20A4%20(002).pdf"},
+            {"nome": "Opera", "categoria": "Fungicida", "conc": "epoxiconazol (triazol) + piraclostrobina (estrobilurina)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=174188&p_nm_file=F1518627343/OPERA_bula_rev01_06.03.2018.pdf"},
+            {"nome": "Orkestra", "categoria": "Fungicida", "conc": "fluxapiroxade (carboxamida) + piraclostrobina (estrobilurina)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=184911&p_nm_file=F1061419604/ORKESTRA%20SC_bula_rev02_02.05.18.pdf"},
+            {"nome": "Orthene", "categoria": "Acaricida, Inseticida", "conc": "acefato (organofosforado)", "unid": "kg", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=188889&p_nm_file=F377319960/Orthene%20750BR%20Bula%20-%20Inclus%E3o%20da%20cultura%20do%20milho%20agrofit.pdf"},
+            {"nome": "Pacto", "categoria": "Herbicida", "conc": "cloransulam-metílico (sulfonanilida triazolopirimidina)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=156414&p_nm_file=F415925310/Bula_AGROFIT_Pacto_2017_11_07.pdf"},
+            {"nome": "Perito", "categoria": "Inseticida", "conc": "acefato (organofosforado)", "unid": "kg", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=144304&p_nm_file=F1182841927/04_Perito%20970%20SG_Bula_MAPA%20(2017%2006%2019).pdf"},
+            {"nome": "Pirate", "categoria": "Acaricida, Inseticida", "conc": "clorfenapir (análogo de pirazol)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=147946&p_nm_file=F666372320/PIRATE_bula_rev00_28.08.2017_ty.pdf"},
+            {"nome": "Pirephos EC", "categoria": "Inseticida", "conc": "Esfenvalerato (piretróide) + fenitrotiona (organofosforado)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=169864&p_nm_file=F1758032781/Pirephos%20EC%20-%20Bula%2007.02.18%20rev01.pdf"},
+            {"nome": "Pivot", "categoria": "Herbicida", "conc": "imazetapir (imidazolinona)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=188172&p_nm_file=F1422443236/Pivot%20100%20SL_bula_rev.01_02.01.2018.pdf"},
+            {"nome": "Pix HC", "categoria": "Regulador De Crescimento", "conc": "Cloreto de Mepiquate (amônio quaternário)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=165865&p_nm_file=F1631456394/PIX%20HC-bula-rev01_08jan18.pdf"},
+            {"nome": "Poast", "categoria": "Herbicida", "conc": "setoxidim (oxima ciclohexanodiona)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=177904&p_nm_file=F1324175406/Poast-Bula_rev.01_21.03.2018.pdf"},
+            {"nome": "Podium", "categoria": "Herbicida", "conc": "fenoxaprope-P-etílico (ácido ariloxifenoxipropiônico)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=189467&p_nm_file=F74058336/PODIUM%20EW_Bula_Agrofit02_Revis%E3o_04.06.2018.pdf"},
+            {"nome": "Polo PM", "categoria": "Acaricida, Inseticida", "conc": "diafentiurom (feniltiouréia)", "unid": "kg", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=188267&p_nm_file=F1570363450/POLO%20500%20SC_BulaCompleta_Alteracao%20de%20quadro%20m%E9dico.pdf"},
+            {"nome": "Premio", "categoria": "Inseticida", "conc": "clorantraniliprole (antranilamida)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=181187&p_nm_file=F567600928/Bula%20-%20Premio%20-%2012-04-2018.pdf"},
+            {"nome": "Previnil", "categoria": "Fungicida", "conc": "clorotalonil (isoftalonitrila)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=184928&p_nm_file=F248432297/20180504_Previnil_Bula_Agrofit.pdf"},
+            {"nome": "Priori 250 SC", "categoria": "Fungicida", "conc": "azoxistrobina (estrobilurina)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=190388&p_nm_file=F1671447049/PRIORI%20_BulaCompleta_IN16.pdf"},
+            {"nome": "PrioriXtra", "categoria": "Fungicida", "conc": "azoxistrobina (estrobilurina) + ciproconazol (triazol)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=192469&p_nm_file=F361666946/PRIORI%20XTRA_Bula%20Completa_Ferrugem%20soja.pdf"},
+            {"nome": "Privilege", "categoria": "Inseticida", "conc": "acetamiprido (neonicotinóide) + piriproxifem (éter piridiloxipropílico)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=191430&p_nm_file=F753122420/Privilege%20-%20bula%20-%203103874.pdf"},
+            {"nome": "Protreat", "categoria": "Fungicida", "conc": "carbendazim (benzimidazol) + tiram (dimetilditiocarbamato)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=191527&p_nm_file=F2054306197/Bula%20Protreat_v05.pdf"},
+            {"nome": "Quality", "categoria": "Fungicida Microbiológico", "conc": "Trichoderma asperellum (biológico)", "unid": "kg", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=176784&p_nm_file=F205769836/QUALITY%20AGROFIT.pdf"},
+            {"nome": "Radiant", "categoria": "Herbicida", "conc": "flumicloraque-pentílico (ciclohexenodicarboximida)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=149128&p_nm_file=F1988172358/Radiant%20100%20EC%20-%20Bula%2004.09.17%20rev00.pdf"},
+            {"nome": "Regent 800 WG", "categoria": "Inseticida, Cupinicida", "conc": "fipronil (pirazol)", "unid": "kg", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=177346&p_nm_file=F1006506539/REGENT_800_WG_bula_rev01_20.03.2018.pdf"},
+            {"nome": "Reglone", "categoria": "Herbicida", "conc": "Dibrometo de diquate (bipiridílio)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=147535&p_nm_file=F693165724/REGLONE%20BulaCompleta%20IN%2016.pdf"},
+            {"nome": "Rizos", "categoria": "Nematicida Microbiológico", "conc": "Bacillus subtilis (biológico)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=188047&p_nm_file=F2029654488/BULA%20RIZOS%205L%20NOVO%20A4.pdf"},
+            {"nome": "Rizotec", "categoria": "Nematicida Microbiológico", "conc": "Pochonia chlamydosporia (biológico)", "unid": "kg", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=152145&p_nm_file=F523947448/Bula%20Rizotec%20IN16.pdf"},
+            {"nome": "Roundup original", "categoria": "Herbicida", "conc": "glifosato-sal de isopropilamina (glicina substituída)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=151837&p_nm_file=F1472457697/BROCOMP1709-01%20-%20AgroFit.pdf"},
+            {"nome": "Roundup Ready", "categoria": "Herbicida", "conc": "glifosato-sal de isopropilamina (glicina substituída)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=159189&p_nm_file=F995647781/BRECOMP1711-00%20-%20AgroFit.pdf"},
+            {"nome": "Roundup WG", "categoria": "Herbicida", "conc": "glifosato-sal de amônio (glicina substituída)", "unid": "kg", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=151812&p_nm_file=F1682070465/BRWGCOMP1708-01%20-%20AgroFit.pdf"},
+            {"nome": "Sag", "categoria": "Defensivo", "conc": "", "unid": "litro", "bula": ""},
+            {"nome": "Sanson 40 SC", "categoria": "Herbicida", "conc": "nicossulfurom (sulfoniluréia)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=167555&p_nm_file=F1748882866/Bula_SANSON%2040SC_02.pdf"},
+            {"nome": "Saurus", "categoria": "Inseticida", "conc": "acetamiprido (neonicotinóide)", "unid": "kg", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=154057&p_nm_file=F1760320154/Saurus_bula_3103412.pdf"},
+            {"nome": "Score", "categoria": "Fungicida", "conc": "difenoconazol (triazol)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=190237&p_nm_file=F1906020566/SCORE%20BulaCompletaIN%2016.pdf"},
+            {"nome": "Scorpion", "categoria": "Herbicida", "conc": "flumetsulam (sulfonanilida triazolopirimidina)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=162748&p_nm_file=F929578353/Bula_AGROFIT_Scorpion_2017_12_13.pdf"},
+            {"nome": "Select", "categoria": "Herbicida", "conc": "cletodim (oxima ciclohexanodiona)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=184513&p_nm_file=F552048272/Select%20240EC%20Bula%20-%2025.04.2018%20(inclusao%20girassol,%20ma%E7%E3%20e%20uva)%20-%20v2.pdf"},
+            {"nome": "Sfera", "categoria": "Defensivo", "conc": "", "unid": "litro", "bula": ""},
+            {"nome": "Simboll 125 SC", "categoria": "Fungicida", "conc": "flutriafol (triazol)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=158657&p_nm_file=F1716540893/Simboll-125SC_BL_2017-11-13.pdf"},
+            {"nome": "Soberan", "categoria": "Herbicida", "conc": "Tembotriona (Tricetona)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=148680&p_nm_file=F983466022/Soberan_Bula_Agrofit%2001_IN16_04.09.2017.pdf"},
+            {"nome": "Spider 850 GRDA", "categoria": "Herbicida", "conc": "diclosulam (sulfonanilida triazolopirimidina)", "unid": "kg", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=162485&p_nm_file=F895723123/Bula_AGROFIT_Spider%20840%20WG_2017_12_11.pdf"},
+            {"nome": "Standak", "categoria": "Inseticida", "conc": "fipronil (pirazol)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=150168&p_nm_file=F677997814/STANDAK_bula_rev00_25.08.2017.pdf"},
+            {"nome": "Standak Top", "categoria": "Fungicida, Inseticida", "conc": "fipronil (pirazol) + piraclostrobina (estrobilurina) + tiofanato-metílico (benzimidazol (precursor de))", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=167206&p_nm_file=F1974463087/STANDAK_TOP_bula_rev03_18.01.2018.pdf"},
+            {"nome": "Staple", "categoria": "Herbicida", "conc": "Piritiobaque-sódico (análogo de ácido pirimidiniloxibenzóico)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=186630&p_nm_file=F46459258/Staple280CS_bula_3103860.pdf"},
+            {"nome": "Sumidan 150 SC", "categoria": "Inseticida", "conc": "Esfenvalerato (piretróide)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=149603&p_nm_file=F1722909712/SUMIDAN%20150%20SC%20-%20Bula%20-%2006.09.2017%20-%20Rev00.pdf"},
+            {"nome": "Suprathion", "categoria": "Inseticida", "conc": "metidationa (organofosforado)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=158653&p_nm_file=F1926102869/BULA%20SUPRATHION%20400%20EC%2014112017.pdf"},
+            {"nome": "TA 35", "categoria": "Adjuvante", "conc": "", "unid": "litro", "bula": ""},
+            {"nome": "Talisman", "categoria": "Acaricida, Inseticida", "conc": "bifentrina (piretróide) + carbosulfano (metilcarbamato de benzofuranila)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=178528&p_nm_file=F42356492/BL%20-%20Talisman%20-%20incl%20de%20alvo%20e%20Ajuste%20de%20dose%20em%20Milho%20e%20Soja%20-%2013mar%E7o2018.pdf"},
+            {"nome": "Talstar", "categoria": "Acaricida, Inseticida", "conc": "bifentrina (piretróide)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=175164&p_nm_file=F1942788749/Bula%20TALSTAR%20100%20EC%20-%20Inclus%E3o%20de%20cultura%20-%20Melancia-%2013mar2018.pdf"},
+            {"nome": "Tec goldem", "categoria": "Defensivo", "conc": "", "unid": "litro", "bula": ""},
+            {"nome": "Tiger 100 EC", "categoria": "Inseticida", "conc": "piriproxifem (éter piridiloxipropílico)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=167746&p_nm_file=F2051310742/Tiger%20100%20EC%20-%20Bula%20-23.01.18%20rev01.pdf"},
+            {"nome": "TMBicudo", "categoria": "Feromônio, Inseticida", "conc": "Grandlure (I, II, III e IV) (álcool alifático) + malationa (organofosforado)", "unid": "litro", "bula": ""},
+            {"nome": "Total-Nitro", "categoria": "Inoculante", "conc": "", "unid": "litro", "bula": ""},
+            {"nome": "Tracer", "categoria": "Inseticida", "conc": "Espinosade (espinosinas)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=167710&p_nm_file=F343865880/Bula_AGROFIT_Tracer_2018_01_23.pdf"},
+            {"nome": "Trifuralina", "categoria": "Herbicida", "conc": "trifluralina (dinitroanilina)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=150844&p_nm_file=F1604740494/BULA_TRIFLURALINA_MILENIA_13092017.pdf"},
+            {"nome": "Tuval", "categoria": "Regulador De Crescimento", "conc": "Cloreto de clormequate (amônio quaternário)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=155908&p_nm_file=F1075352745/Bula%20Tuval.pdf"},
+            {"nome": "Unizeb Gold", "categoria": "Fungicida", "conc": "mancozebe (alquilenobis(ditiocarbamato))", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=152061&p_nm_file=F938832294/04_Unizeb%20Gold_Bula_MAPA%20(2017%2009%2015).pdf"},
+            {"nome": "Verdict", "categoria": "Herbicida", "conc": "haloxifope-P-metílico (ácido ariloxifenoxipropiônico)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=170365&p_nm_file=F1140702340/Bula_AGROFIT_Verdict%20R_2018_02_16.pdf"},
+            {"nome": "Vertimec", "categoria": "Acaricida, Inseticida, Nematicida", "conc": "abamectina (avermectina)", "unid": "kg", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=190367&p_nm_file=F1401064666/VERTIMEC%2018%20EC_BULA%20COMPLETA_04%2001%202018.pdf"},
+            {"nome": "Vessarya", "categoria": "Fungicida", "conc": "Benzovindiflupyr (pirazol carboxamida) + Picoxistrobina (estrobilurina)", "unid": "litro", "bula": "http://agrofit.agricultura.gov.br/agrofit_cons/agrofit.ap_download_blob_agrofit?p_id_file=153618&p_nm_file=F620132780/Bula_Vessarya_R3%20-(003).pdf"}
+        ];
+
+        const MAX_PRODUTOS = 10;
+        let contadorProdutos = 0;
+        let imagensCarregadas = [];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const hoje = new Date().toISOString().split('T')[0];
+            document.getElementById('data_atual').value = hoje;
+            document.getElementById('data_aplicacao').value = hoje;
+
+            const inputs = document.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => input.addEventListener('input', atualizarPDF));
+
+            carregarExemplo();
+        });
+
+        function aoSelecionarFazenda() {
+            const fazendaSelect = document.getElementById('fazenda').value;
+            const multiSelect = document.getElementById('talhoes_multi_select');
+
+            multiSelect.innerHTML = '';
+
+            if (FAZENDAS_DB[fazendaSelect]) {
+                FAZENDAS_DB[fazendaSelect].forEach(item => {
+                    const opt = document.createElement('option');
+                    opt.value = item.talhao;
+                    opt.dataset.area = item.area;
+                    opt.innerText = `${item.talhao} (${item.area} ha)`;
+                    multiSelect.appendChild(opt);
+                });
+            } else {
+                multiSelect.innerHTML = '<option value="" disabled>-- NENHUM TALHÃO DISPONÍVEL --</option>';
+            }
+
+            aoSelecionarMultiplosTalhoes();
+        }
+
+        function aoSelecionarMultiplosTalhoes() {
+            const multiSelect = document.getElementById('talhoes_multi_select');
+            const selecionados = Array.from(multiSelect.selectedOptions);
+            
+            let areaTotal = 0;
+            let nomesTalhoes = [];
+
+            selecionados.forEach(opt => {
+                areaTotal += parseFloat(opt.dataset.area) || 0;
+                nomesTalhoes.push(opt.value);
+            });
+
+            document.getElementById('area_ha').value = areaTotal;
+            document.getElementById('pdf_talhao').innerText = nomesTalhoes.length > 0 ? nomesTalhoes.join(', ') : '---';
+
+            calcularCalibracao();
+        }
+
+        function atualizarContadorProdutosUI() {
+            const linhas = document.querySelectorAll('[id^="prod-linha-"]');
+            const qtd = linhas.length;
+
+            document.getElementById('contador_produtos_badge').innerText = `${qtd} / ${MAX_PRODUTOS}`;
+            document.getElementById('pdf_prod_count').innerText = `${qtd} / ${MAX_PRODUTOS} Itens`;
+
+            const btnAdd = document.getElementById('btn_add_produto');
+            if (qtd >= MAX_PRODUTOS) {
+                btnAdd.disabled = true;
+                btnAdd.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                btnAdd.disabled = false;
+                btnAdd.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        function adicionarProdutoLinha(pData = null) {
+            const linhasAtuais = document.querySelectorAll('[id^="prod-linha-"]');
+            if (linhasAtuais.length >= MAX_PRODUTOS) {
+                alert(`Limite máximo de ${MAX_PRODUTOS} itens de produtos atingido por recomendação!`);
+                return;
+            }
+
+            contadorProdutos++;
+            const id = contadorProdutos;
+            const container = document.getElementById('container-produtos');
+
+            const div = document.createElement('div');
+            div.id = `prod-linha-${id}`;
+            div.className = "p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2 shadow-sm transition-all";
+
+            let optionsHtml = CATALOGO_PRODUTOS.map(p => `<option value="${p.nome}">${p.nome} (${p.categoria} - ${p.conc})</option>`).join('');
+
+            div.innerHTML = `
+                <div class="flex justify-between items-center">
+                    <span class="text-xs font-bold text-agro-800 flex items-center gap-1">
+                        <i class="fa-solid fa-flask text-emerald-600"></i> Item #${id}
+                    </span>
+                    <div class="flex items-center gap-2">
+                        <span id="prod_bula_link_${id}" class="hidden">
+                            <a href="#" target="_blank" class="text-[11px] text-blue-600 hover:underline flex items-center gap-1 font-semibold">
+                                <i class="fa-solid fa-file-pdf text-red-500"></i> Bula Agrofit
+                            </a>
+                        </span>
+                        <button onclick="removerProdutoLinha(${id})" class="text-xs text-red-500 hover:text-red-700 font-semibold">
+                            <i class="fa-solid fa-trash"></i> Remover
+                        </button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-500">Nome do Produto (Busca da Planilha)</label>
+                        <input type="text" id="prod_nome_${id}" list="dl_prod_${id}" placeholder="Pesquise o produto..." oninput="autopreencherProduto(${id}); calcularTotaisProdutos();" class="w-full px-2.5 py-1.5 border border-slate-300 rounded text-xs font-semibold focus:ring-2 focus:ring-agro-500">
+                        <datalist id="dl_prod_${id}">${optionsHtml}</datalist>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-500">Categoria</label>
+                        <input type="text" id="prod_cat_${id}" placeholder="Herbicida, Fungicida..." oninput="atualizarPDF()" class="w-full px-2.5 py-1.5 border border-slate-300 rounded text-xs">
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-500">Dose (/ha)</label>
+                        <input type="number" step="0.001" id="prod_dose_${id}" placeholder="0.00" oninput="calcularTotaisProdutos()" class="w-full px-2.5 py-1.5 border border-slate-300 rounded text-xs font-bold text-agro-700">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-500">Unidade</label>
+                        <select id="prod_unid_${id}" onchange="atualizarPDF()" class="w-full px-2.5 py-1.5 border border-slate-300 rounded text-xs bg-white">
+                            <option value="litro">litro</option>
+                            <option value="kg">kg</option>
+                            <option value="mL">mL</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-500">Total / Tanque</label>
+                        <input type="text" id="prod_total_${id}" readonly placeholder="0.0" class="w-full px-2.5 py-1.5 border border-slate-200 bg-emerald-50 font-bold text-emerald-800 rounded text-xs">
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(div);
+
+            if (pData) {
+                document.getElementById(`prod_nome_${id}`).value = pData.nome;
+                document.getElementById(`prod_dose_${id}`).value = pData.dose;
+                autopreencherProduto(id);
+            }
+
+            atualizarContadorProdutosUI();
+            calcularTotaisProdutos();
+        }
+
+        function autopreencherProduto(id) {
+            const val = document.getElementById(`prod_nome_${id}`).value;
+            const encontre = CATALOGO_PRODUTOS.find(p => p.nome.toLowerCase() === val.toLowerCase());
+            const bulaSpan = document.getElementById(`prod_bula_link_${id}`);
+
+            if (encontre) {
+                document.getElementById(`prod_cat_${id}`).value = encontre.categoria;
+                document.getElementById(`prod_unid_${id}`).value = encontre.unid;
+                
+                if (encontre.bula) {
+                    bulaSpan.classList.remove('hidden');
+                    bulaSpan.querySelector('a').href = encontre.bula;
+                } else {
+                    bulaSpan.classList.add('hidden');
+                }
+            } else {
+                bulaSpan.classList.add('hidden');
+            }
+        }
+
+        function removerProdutoLinha(id) {
+            const linha = document.getElementById(`prod-linha-${id}`);
+            if (linha) {
+                linha.remove();
+                atualizarContadorProdutosUI();
+                calcularTotaisProdutos();
+            }
+        }
+
+        function calcularCalibracao() {
+            const tanque = parseFloat(document.getElementById('eq_tanque').value) || 0;
+            const vazao = parseFloat(document.getElementById('eq_vazao').value) || 0;
+            
+            let haPorTanque = vazao > 0 ? (tanque / vazao) : 0;
+            document.getElementById('badge_ha_tanque').innerText = `${haPorTanque.toFixed(1)} Ha / Tanque`;
+
+            calcularTotaisProdutos();
+        }
+
+        function calcularTotaisProdutos() {
+            const tanque = parseFloat(document.getElementById('eq_tanque').value) || 0;
+            const vazao = parseFloat(document.getElementById('eq_vazao').value) || 0;
+            const haPorTanque = vazao > 0 ? (tanque / vazao) : 0;
+
+            const linhas = document.querySelectorAll('[id^="prod-linha-"]');
+            
+            linhas.forEach(div => {
+                const id = div.id.replace('prod-linha-', '');
+                const dose = parseFloat(document.getElementById(`prod_dose_${id}`).value) || 0;
+                const total = dose * haPorTanque;
+                document.getElementById(`prod_total_${id}`).value = total.toFixed(1);
+            });
+
+            atualizarPDF();
+        }
+
+        function carregarImagens(e) {
+            const files = Array.from(e.target.files);
+            files.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    imagensCarregadas.push(event.target.result);
+                    renderizarImagens();
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function removerImagem(index) {
+            imagensCarregadas.splice(index, 1);
+            renderizarImagens();
+        }
+
+        function renderizarImagens() {
+            const previewContainer = document.getElementById('container_preview_imagens');
+            const pdfGrid = document.getElementById('pdf_grid_imagens');
+            const pdfSecao = document.getElementById('pdf_secao_imagens');
+
+            previewContainer.innerHTML = '';
+            pdfGrid.innerHTML = '';
+
+            if (imagensCarregadas.length === 0) {
+                previewContainer.innerHTML = `<div class="col-span-full text-center text-xs text-slate-400 py-4 border border-dashed border-slate-200 rounded-xl">Nenhuma imagem adicionada</div>`;
+                pdfSecao.classList.add('hidden');
+                return;
+            }
+
+            pdfSecao.classList.remove('hidden');
+
+            imagensCarregadas.forEach((src, idx) => {
+                // Render no formulário
+                const divPrev = document.createElement('div');
+                divPrev.className = 'relative group border border-slate-200 rounded-lg overflow-hidden bg-slate-100 aspect-square flex items-center justify-center';
+                divPrev.innerHTML = `
+                    <img src="${src}" class="object-cover w-full h-full">
+                    <button onclick="removerImagem(${idx})" class="absolute top-1 right-1 bg-red-600 text-white w-5 h-5 rounded-full text-xs flex items-center justify-center shadow hover:bg-red-700">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                `;
+                previewContainer.appendChild(divPrev);
+
+                // Render no relatório PDF
+                const divPdf = document.createElement('div');
+                divPdf.className = 'border border-slate-300 rounded overflow-hidden h-24 bg-white flex items-center justify-center';
+                divPdf.innerHTML = `<img src="${src}" class="max-h-full max-w-full object-contain mx-auto">`;
+                pdfGrid.appendChild(divPdf);
+            });
+        }
+
+        function atualizarPDF() {
+            const fazendaVal = document.getElementById('fazenda').value.replace(/_/g, ' ');
+            document.getElementById('pdf_fazenda').innerText = fazendaVal || '---';
+
+            document.getElementById('pdf_rec_num').innerText = document.getElementById('rec_num').value || '01';
+            document.getElementById('pdf_area').innerText = document.getElementById('area_ha').value || '0';
+            document.getElementById('pdf_data_atual').innerText = document.getElementById('data_atual').value || '---';
+            document.getElementById('pdf_data_aplicacao').innerText = document.getElementById('data_aplicacao').value || '---';
+            document.getElementById('pdf_cultura').innerText = document.getElementById('cultura').value || '---';
+            document.getElementById('pdf_estagio').innerText = document.getElementById('estagio').value || '---';
+            document.getElementById('pdf_objetivo').innerText = document.getElementById('objetivo').value || '---';
+
+            // ATUALIZAÇÃO DA CALIBRAÇÃO NO RELATÓRIO
+            const modeloEq = document.getElementById('eq_modelo').value || '---';
+            const tanqueL = document.getElementById('eq_tanque').value || '0';
+            const vazaoLha = document.getElementById('eq_vazao').value || '0';
+            const bicoEq = document.getElementById('eq_bico').value || '---';
+            const gotaEq = document.getElementById('eq_gota').value || '---';
+            const pressaoEq = document.getElementById('eq_pressao').value || '---';
+            const haTanqueCalc = (parseFloat(vazaoLha) > 0 ? (parseFloat(tanqueL) / parseFloat(vazaoLha)) : 0).toFixed(1);
+
+            document.getElementById('pdf_eq_modelo').innerText = modeloEq;
+            document.getElementById('pdf_eq_tanque').innerText = tanqueL;
+            document.getElementById('pdf_eq_vazao').innerText = vazaoLha;
+            document.getElementById('pdf_eq_bico').innerText = bicoEq;
+            document.getElementById('pdf_eq_gota').innerText = gotaEq;
+            document.getElementById('pdf_eq_pressao').innerText = pressaoEq;
+            document.getElementById('pdf_eq_ha_tanque').innerText = haTanqueCalc;
+
+            // CONDIÇÕES AMBIENTAIS NO RELATÓRIO
+            document.getElementById('pdf_clima_umidade').innerText = document.getElementById('clima_umidade').value || '---';
+            document.getElementById('pdf_clima_vento').innerText = document.getElementById('clima_vento').value || '---';
+            document.getElementById('pdf_clima_temp').innerText = document.getElementById('clima_temp').value || '---';
+
+            // OBSERVAÇÕES E RESPONSÁVEIS
+            const obsText = document.getElementById('obs_tecnica').value.trim();
+            document.getElementById('pdf_obs_tecnica').innerText = obsText || 'Nenhuma observação inserida.';
+
+            document.getElementById('pdf_resp_tecnico').innerText = document.getElementById('resp_tecnico').value || 'RESPONSÁVEL TÉCNICO';
+            document.getElementById('pdf_resp_operacional').innerText = document.getElementById('resp_operacional').value || 'RESPONSÁVEL OPERACIONAL';
+
+            const pdfTabela = document.getElementById('pdf_tabela_produtos');
+            pdfTabela.innerHTML = '';
+
+            const linhas = document.querySelectorAll('[id^="prod-linha-"]');
+            if (linhas.length === 0) {
+                pdfTabela.innerHTML = '<tr><td colspan="5" class="p-2 text-center text-slate-400">Nenhum produto adicionado</td></tr>';
+                return;
+            }
+
+            linhas.forEach(div => {
+                const id = div.id.replace('prod-linha-', '');
+                const nome = document.getElementById(`prod_nome_${id}`).value || '---';
+                const cat = document.getElementById(`prod_cat_${id}`).value || '---';
+                const dose = document.getElementById(`prod_dose_${id}`).value || '0';
+                const unid = document.getElementById(`prod_unid_${id}`).value || 'l';
+                const total = document.getElementById(`prod_total_${id}`).value || '0';
+
+                const tr = document.createElement('tr');
+                tr.className = 'border-b border-slate-200';
+                tr.innerHTML = `
+                    <td class="p-1 border-r border-slate-200 font-bold text-slate-800">${nome}</td>
+                    <td class="p-1 border-r border-slate-200 text-slate-600">${cat}</td>
+                    <td class="p-1 border-r border-slate-200 text-right font-medium">${dose}</td>
+                    <td class="p-1 border-r border-slate-200 text-right font-bold text-emerald-800 bg-emerald-50">${total}</td>
+                    <td class="p-1 text-slate-600">${unid}</td>
+                `;
+                pdfTabela.appendChild(tr);
+            });
+        }
+
+        function carregarExemplo() {
+            document.getElementById('rec_num').value = '01';
+            document.getElementById('fazenda').value = 'AgroChapada';
+            aoSelecionarFazenda();
+
+            const multiSelect = document.getElementById('talhoes_multi_select');
+            if (multiSelect.options.length >= 2) {
+                multiSelect.options[0].selected = true;
+                multiSelect.options[1].selected = true;
+            }
+            aoSelecionarMultiplosTalhoes();
+
+            document.getElementById('eq_modelo').value = 'Jacto Uniport 3000';
+            document.getElementById('eq_tanque').value = '3000';
+            document.getElementById('eq_vazao').value = '60';
+            document.getElementById('eq_bico').value = 'AIXR 11002';
+            document.getElementById('eq_gota').value = 'Grossa';
+            document.getElementById('eq_pressao').value = '40 PSI';
+
+            document.getElementById('clima_umidade').value = '> 55%';
+            document.getElementById('clima_vento').value = '3 - 10 km/h';
+            document.getElementById('clima_temp').value = '< 30 °C';
+
+            document.getElementById('resp_tecnico').value = 'Eng. Agrônomo João Silva (CREA 12345/D)';
+            document.getElementById('resp_operacional').value = 'Carlos Eduardo (Gerente)';
+            document.getElementById('obs_tecnica').value = 'Realizar a aplicação no período matutino ou final da tarde.\nManter a velocidade constante do equipamento e checar o estado dos bicos de pulverização.';
+
+            document.getElementById('container-produtos').innerHTML = '';
+            contadorProdutos = 0;
+
+            adicionarProdutoLinha({ nome: 'Abacus', dose: 0.5 });
+            adicionarProdutoLinha({ nome: 'Actara 250 WG', dose: 0.1 });
+            adicionarProdutoLinha({ nome: 'Agral', dose: 0.2 });
+
+            calcularCalibracao();
+        }
+
+        function gerarPDF() {
+            const el = document.getElementById('printable-report');
+            const num = document.getElementById('rec_num').value || '01';
+
+            const opt = {
+                margin: 0.3,
+                filename: `Recomendacao_${num}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+
+            return html2pdf().set(opt).from(el).save();
+        }
+
+        // FUNÇÃO DE COMPARTILHAMENTO / ENVIO DO PDF PELO WHATSAPP
+        async function compartilharPdfWhatsApp() {
+            const el = document.getElementById('printable-report');
+            const num = document.getElementById('rec_num').value || '01';
+            const fazendaVal = document.getElementById('fazenda').value.replace(/_/g, ' ');
+            const area = document.getElementById('area_ha').value || '0';
+            const nomeArquivo = `Recomendacao_${num}_${fazendaVal || 'Agro'}.pdf`;
+
+            try {
+                const opt = {
+                    margin: 0.3,
+                    filename: nomeArquivo,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2 },
+                    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+                };
+
+                const pdfBlob = await html2pdf().set(opt).from(el).output('blob');
+                const pdfFile = new File([pdfBlob], nomeArquivo, { type: 'application/pdf' });
+
+                if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+                    await navigator.share({
+                        title: `Recomendação Agrícola Nº ${num} - ${fazendaVal}`,
+                        text: `Segue em anexo o Relatório Técnico de Recomendação Nº ${num} para a Fazenda ${fazendaVal}.`,
+                        files: [pdfFile]
+                    });
+                    return;
+                }
+            } catch (err) {
+                console.log("Abertura Web Share API não disponível ou cancelada:", err);
+            }
+
+            let texto = `*RECOMENDAÇÃO AGRÍCOLA Nº ${num}*\n`;
+            texto += `🌱 *Fazenda:* ${fazendaVal || '---'}\n`;
+            texto += `📍 *Área Total:* ${area} ha\n`;
+            texto += `📅 *Data:* ${document.getElementById('data_atual').value || '---'}\n\n`;
+            texto += `*CALIBRAÇÃO DO PULVERIZADOR:*\n`;
+            texto += `• Modelo: ${document.getElementById('eq_modelo').value || '---'}\n`;
+            texto += `• Capacidade Tanque: ${document.getElementById('eq_tanque').value || '0'} L\n`;
+            texto += `• Vazão: ${document.getElementById('eq_vazao').value || '0'} L/ha\n`;
+            texto += `• Rendimento: ${document.getElementById('pdf_eq_ha_tanque').innerText || '0.0'} Ha/Tanque\n\n`;
+            texto += `*CONDIÇÕES AMBIENTAIS MÍNIMAS:*\n`;
+            texto += `• Umidade: ${document.getElementById('clima_umidade').value || '---'}\n`;
+            texto += `• Vento: ${document.getElementById('clima_vento').value || '---'}\n`;
+            texto += `• Temperatura: ${document.getElementById('clima_temp').value || '---'}\n\n`;
+            texto += `*PRODUTOS RECOMENDADOS:*\n`;
+
+            const linhas = document.querySelectorAll('[id^="prod-linha-"]');
+            linhas.forEach(div => {
+                const id = div.id.replace('prod-linha-', '');
+                const nome = document.getElementById(`prod_nome_${id}`).value;
+                const dose = document.getElementById(`prod_dose_${id}`).value;
+                const unid = document.getElementById(`prod_unid_${id}`).value;
+                const total = document.getElementById(`prod_total_${id}`).value;
+
+                if (nome) {
+                    texto += `• *${nome}*: ${dose} ${unid}/ha  (Total: ${total} ${unid}/tanque)\n`;
+                }
+            });
+
+            const obs = document.getElementById('obs_tecnica').value.trim();
+            if (obs) {
+                texto += `\n📝 *OBSERVAÇÕES:*\n${obs}\n`;
+            }
+
+            texto += `\n📄 *Relatório técnico digital gerado.*`;
+
+            const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`;
+            window.open(url, '_blank');
+        }
+    </script>
+</body>
+</html>
